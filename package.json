@@ -11,7 +11,8 @@
 		"express": "3.x",
 		"nodeunit": ">=0.7",
 		"optimist": ">=0.6",
-		"backbone": ">=1.0.0"
+		"backbone": ">=1.0.0",
+		"jade": ">=0.35.0"
 	},
 	"engine": {
 		"node": ">=0.10"

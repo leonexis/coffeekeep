@@ -26,7 +26,7 @@ exports.run = ->
         app.listen port
         console.log "Listening on port #{port}"
     
-    rom.read __dirname + '/../areas/school.are'
+    rom.read optimist.argv._[0]
     
 if not module.parent?
     exports.run()

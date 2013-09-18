@@ -1,10 +1,10 @@
 extends ../layout
 
 block content
-    h1= 'Area ' + area.get('title')
+    h1= 'Area: ' + area.get('title')
     ul
         - area.rooms.each(function(room){
             li
-                a(href='/map/' + room.get('id'))
+                a(href='/world/' + area.get('id') + '/' + room.get('id'))
                     = room.get('id') + ': ' + room.get('title')
         - })
