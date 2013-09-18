@@ -1,0 +1,19 @@
+{
+	"name": "coffeekeep",
+	"description": "Coffee Keep MUD Engine",
+	"url": "http://github.com/leonexis/coffeekeep/issues",
+	"version": "0.0.1",
+	"main": "./lib/index.js",
+	"bin": "./bin/viron-server",
+	"license": "MIT",
+	"dependencies": {
+		"coffee-script": ">=1.6.3",
+		"express": "3.x",
+		"nodeunit": ">=0.7",
+		"optimist": ">=0.6",
+		"backbone": ">=1.0.0"
+	},
+	"engine": {
+		"node": ">=0.10"
+	}
+}

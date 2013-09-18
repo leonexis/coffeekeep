@@ -1,0 +1,13 @@
+
+extends ../layout
+
+block content
+    pre
+        .room-title= room.get('title')
+        .room-desc= room.get('description')
+        ul.room-links
+            for link, direction in room.get('links')
+                li
+                    a(href='./' + link.room)= direction
+                    | - 
+                    span.link-desc= link.description

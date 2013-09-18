@@ -1,0 +1,10 @@
+extends ../layout
+
+block content
+    h1= 'Area ' + area.get('title')
+    ul
+        - area.rooms.each(function(room){
+            li
+                a(href='/map/' + room.get('id'))
+                    = room.get('id') + ': ' + room.get('title')
+        - })
