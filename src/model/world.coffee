@@ -4,4 +4,3 @@
 exports.World = class World extends Model
     initialize: ->
         @areas = new AreaCollection()
-        

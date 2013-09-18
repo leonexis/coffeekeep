@@ -18,6 +18,7 @@ exports.run = ->
     
     rom.on 'room', (data) ->
         room = new Room data
+        room.area = currentArea
         currentArea.rooms.add room
     
     rom.on 'done', ->
