@@ -12,7 +12,10 @@
 		"nodeunit": ">=0.7",
 		"optimist": ">=0.6",
 		"backbone": ">=1.0.0",
-		"jade": ">=0.35.0"
+		"jade": ">=0.35.0",
+		"underscore": ">=1.5.2",
+		"term.js": ">=0.0.3",
+		"socket.io": ">=0.9.13"
 	},
 	"engine": {
 		"node": ">=0.10"

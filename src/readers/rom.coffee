@@ -104,7 +104,7 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
                 emitState = switch state
                     when 'rooms' then 'room'
                     else state
-                console.log "Emitting #{emitState}, #{JSON.stringify current}"
+                console.log "Emitting #{emitState}, #{JSON.stringify current}" if @debug
                 @emit emitState, current
                 
             current = null

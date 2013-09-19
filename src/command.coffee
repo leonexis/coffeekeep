@@ -2,7 +2,7 @@ optimist = require 'optimist'
 {World} = require './model/world'
 {Area} = require './model/area'
 {Room} = require './model/room'
-{app} = require './app'
+{app, httpServer} = require './app'
 
 exports.run = ->
     {ROMReader} = require './readers/rom'
@@ -24,7 +24,7 @@ exports.run = ->
     rom.on 'done', ->
         app.set 'coffeekeep world', world
         port = process.env.PORT ? 5555
-        app.listen port
+        httpServer.listen port
         console.log "Listening on port #{port}"
     
     rom.read optimist.argv._[0]
