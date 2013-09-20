@@ -4,40 +4,26 @@ Web-based Mud Client Service
 io = require 'socket.io'
 {EventEmitter} = require 'events'
 
-exports.MudClientSession = class MudClientSession
+exports.MudClientSession = class MudClientSession extends EventEmitter
     constructor: (@service, @term) ->
         # TODO: create mud session
+        @mud = @service.mudService.createSession @
         @term.on 'disconnect', =>
-            @onDisconnect
+            @emit 'close'
         
         @term.on 'data', (data) =>
-            @onTermData data
-        
-        #@mud.on 'data', (data) =>
-        #    @onMudData data
-        
-        #@mud.on 'disconnect', =>
-        #    @onMudDisconnect
-        
-        @term.emit 'data', "Connected to Mud Client from #{@term.id}\r\n"
-    
-    onDisconnect: ->
-        #@mud.disconnect()
-        @service.unregisterSession @
-    
-    onTermData: (data) ->
-        #@mud.write 'data', data
-    
-    onMudData: (data) ->
+            @emit 'data', data
+
+    write: (data) ->
         @term.emit 'data', data
-    
-    onMudDisconnect: ->
+        
+    close: ->
         @term.emit 'data', '\n\nConnection terminated by server'
         @term.disconnect()
 
 exports.MudClientService = class MudClientService
-    constructor: (@service) ->
-        @service.on 'connection', (socket) =>
+    constructor: (@mudService, @termService) ->
+        @termService.on 'connection', (socket) =>
             @registerSession socket
         @sessions = {}
     

@@ -3,6 +3,8 @@ io = require 'socket.io'
 express = require 'express'
 http = require 'http'
 {MudClientService} = require './terminal'
+{MudService} = require './engine'
+{World} = require './model/world'
 exports.app = app = express()
 exports.httpServer = server = http.createServer(app)
 
@@ -36,8 +38,12 @@ app.get '/world/:areaid/:roomid', (req, res) ->
 app.get '/client', (req, res) ->
     res.render 'mudClient'
 
+app.set 'coffeekeep world', new World()
+
+mudService = new MudService app.get 'coffeekeep world'
+
 mudClientIO = io.listen(server, log: false).of '/mudClient'
-mudClientService = new MudClientService mudClientIO
+mudClientService = new MudClientService mudService, mudClientIO
 
 app.use express.directory "#{__dirname}/../public"
 app.use express.static "#{__dirname}/../public"

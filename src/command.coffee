@@ -7,7 +7,7 @@ optimist = require 'optimist'
 exports.run = ->
     {ROMReader} = require './readers/rom'
     
-    world = new World()
+    world = app.get 'coffeekeep world'
     currentArea = null
     
     rom = new ROMReader()
