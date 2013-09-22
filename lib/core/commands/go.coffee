@@ -1,4 +1,4 @@
-exports.command =
+new Command
     name: 'go'
     aliases: [
         'north', 'east', 'south', 'west', 'up', 'down', 'northwest', 

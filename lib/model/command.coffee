@@ -1,5 +1,6 @@
 fs = require 'fs'
 path = require 'path'
+coffee = require 'coffee-script'
 {splitFull} = require '../util'
 {Model, Collection} = require './'
 
@@ -51,37 +52,35 @@ exports.CommandCollection = class CommandCollection extends Collection
         if fail > 0
             console.error "WARNING: Not all commands loaded successfully. Check configuration."
     
-    loadFile: (fileName, reload=false) ->
+    loadFile: (filename, reload=false) ->
         # Load a command file that exports `exports.commands`
         try
-            base = fileName[...fileName.lastIndexOf '.']
-            if reload and require.cache[base]?
-                delete require.cache[base]
-                
-            {commands, command} = require base
-            if not commands?
-                if command?
-                    commands = [command]
+            evalOptions =
+                modulename: 'command_' + path.basename filename, '.coffee'
+                filename: filename
+                sandbox:
+                    console: console
+                    Command: Command
+            
+            command = coffee.eval fs.readFileSync(filename, 'utf8'), evalOptions
+            
+            base = filename[...filename.lastIndexOf '.']
+            unless command instanceof Command
+                command = new Command command
+            
+            oldCommand = @get command.get 'name'
+            if oldCommand?
+                if reload
+                    console.log "Reloaded command '#{command.get 'name'}'"
                 else
-                    console.error "WARNING: Could not load #{base}"
-                    return false
-            for command in commands
-                unless command instanceof Command
-                    command = new Command command
+                    console.error "WARNING: Command '#{command.get 'name'}' already
+exists from #{oldCommand.get 'fileName'}. Replacing."
+                oldCommand.set command.attributes
+                return true
                 
-                oldCommand = @get command.get 'name'
-                if oldCommand?
-                    if reload
-                        console.log "Reloaded command '#{command.get 'name'}'"
-                    else
-                        console.error "WARNING: Command '#{command.get 'name'}' already
- exists from #{oldCommand.get 'fileName'}. Replacing."
-                    oldCommand.set command.attributes
-                    return true
-                    
-                command.set 'fileName': fileName
-                @add command
-                console.log "Loaded command '#{command.get 'name'}'"
+            command.set 'fileName': filename
+            @add command
+            console.log "Loaded command '#{command.get 'name'}'"
             return true
         catch error
             console.error "Error while loading commands from #{base}: #{error.toString()}"

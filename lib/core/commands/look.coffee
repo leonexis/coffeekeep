@@ -1,4 +1,4 @@
-exports.command =
+new Command
     name: 'look'
     aliases: ['l']
     description: "Describes the environment around the player."

@@ -1,6 +1,4 @@
-# NOT YET WORKING
-
-exports.command =
+new Command
     name: 'reload'
     aliases: []
     description: "Reloads specified resource"
