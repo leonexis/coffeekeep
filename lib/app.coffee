@@ -9,7 +9,7 @@ exports.app = app = express()
 exports.httpServer = server = http.createServer(app)
 
 app.set 'view engine', 'jade'
-app.set 'views', __dirname + '/../views'
+app.set 'views', __dirname + '/views'
 
 app.use express.logger()
 
