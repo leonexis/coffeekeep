@@ -8,7 +8,7 @@ exports.Command = class Command extends Model
     idAttribute: 'name'
     defaults:
         name: 'lazy'                    # Primary command name
-        aliases: ['nop']                # Other command names
+        aliases: []                     # Other command names
         prefixChar: null                # Get anything starting with char
         description: "I don't really do anything"
         help: "Usage: lazy. Dats it"

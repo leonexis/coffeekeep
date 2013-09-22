@@ -11,7 +11,7 @@ exports.Mob = class Mob extends Model
         androgynous: 5  # Wishes to portray no gender. Uses alternate pronouns: zhe/zher(s)
     
     @sex:       # Sexual mechanic
-        none: 0   # No sexual mechanic
+        none: 0         # No sexual mechanic
         male: 1         # Male sexual mechanic
         female: 2       # Female sexual mechanic
         intersex: 3     # Both male and female mechanics

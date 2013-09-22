@@ -6,6 +6,8 @@ exports.User = class User extends Mob
         wasAtLocation: null         # Player location before last disconnect
         passwordHash: null          # Salted and encrypted password hash
     
+    idAttribute: 'name'
+    
     setPassword: (password) ->
         # TODO: store password as salted hash
         @set 'password', "cleartext:#{password}"
