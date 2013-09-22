@@ -2,8 +2,9 @@
 
 exports.User = class User extends Mob
     defaults:
-        #id: username
-        password: null
+        age: 0                      # Player age in days
+        wasAtLocation: null         # Player location before last disconnect
+        passwordHash: null          # Salted and encrypted password hash
     
     setPassword: (password) ->
         # TODO: store password as salted hash

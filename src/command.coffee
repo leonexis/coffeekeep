@@ -2,12 +2,17 @@ optimist = require 'optimist'
 {World} = require './model/world'
 {Area} = require './model/area'
 {Room} = require './model/room'
+{Mob} = require './model/mob'
+{User} = require './model/user'
 {app, httpServer} = require './app'
 
 exports.run = ->
     {ROMReader} = require './readers/rom'
     
     world = app.get 'coffeekeep world'
+    world.users.add
+        name: 'player'
+        
     currentArea = null
     
     rom = new ROMReader()
@@ -28,6 +33,7 @@ exports.run = ->
         console.log "Listening on port #{port}"
     
     rom.read optimist.argv._[0]
+    world.commands.loadDirectory __dirname + '/core/commands'
     
 if not module.parent?
     exports.run()

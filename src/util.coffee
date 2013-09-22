@@ -1,3 +1,5 @@
+_ = require 'underscore'
+
 exports.splitFull = (text, sep, maxsplit=-1) ->
     if not sep?
         sep = /(\s+)/
@@ -5,13 +7,20 @@ exports.splitFull = (text, sep, maxsplit=-1) ->
     parts = text.split sep
     
     if maxsplit == -1
-        return parts
+        if _.isRegExp sep
+            out = []
+            while parts.length > 0
+                out.push parts.shift()
+                parts.shift()
+            return out
+        else
+            return parts
     
     out = []
     splits = 0
     while parts.length > 0 and splits <= maxsplits
         out.push parts.shift()
-        parts.shift() if sep instanceof RegExp
+        parts.shift() if _.isRegExp sep
     
     if sep instanceof RegExp
         parts = parts.join ''
