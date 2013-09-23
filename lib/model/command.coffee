@@ -63,6 +63,7 @@ exports.CommandCollection = class CommandCollection extends Collection
                 sandbox:
                     console: console
                     Command: Command
+                    require: require
             
             command = coffee.eval fs.readFileSync(filename, 'utf8'), evalOptions
             
@@ -125,8 +126,6 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
         
     readlineCompleter: (line, callback) ->
         # TODO: chain completer to command
-        console.log "Attempting to complete: #{line}"
-        
         completions = @validVerbs
         hits = completions.filter (c) ->
             c.indexOf(line) is 0
