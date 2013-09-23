@@ -51,6 +51,8 @@ exports.CommandCollection = class CommandCollection extends Collection
         console.log "Successfully loaded #{success} out of #{success+fail} commands"
         if fail > 0
             console.error "WARNING: Not all commands loaded successfully. Check configuration."
+        
+        do @updateValidCommands
     
     loadFile: (filename, reload=false) ->
         # Load a command file that exports `exports.commands`
@@ -107,3 +109,30 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
             return
         
         commandModel.doCommand context, commandStr
+    
+    updateValidCommands: ->
+        console.log "Updating valid commands"
+        commands = @pluck 'name'
+        aliases = []
+        @forEach (command) ->
+            commandAliases = command.get 'aliases'
+            if commandAliases
+                aliases = aliases.concat command.get 'aliases'
+        
+        @validCommands = commands.sort()
+        @validAliases = aliases.sort()
+        @validVerbs = commands.concat(aliases).sort()
+        
+    readlineCompleter: (line, callback) ->
+        # TODO: chain completer to command
+        console.log "Attempting to complete: #{line}"
+        
+        completions = @validVerbs
+        hits = completions.filter (c) ->
+            c.indexOf(line) is 0
+            
+        if line.length
+            callback null, [hits, line]
+        else
+            callback null, [completions, line]
+            

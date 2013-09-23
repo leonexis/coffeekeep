@@ -5,8 +5,12 @@ io = require 'socket.io'
 {EventEmitter} = require 'events'
 
 exports.MudClientSession = class MudClientSession extends EventEmitter
+    isTTY: true
+    
     constructor: (@service, @term) ->
         # TODO: create mud session
+        @paused = false
+        
         @mud = @service.mudService.createSession @
         @term.on 'disconnect', =>
             @emit 'close'
@@ -20,6 +24,13 @@ exports.MudClientSession = class MudClientSession extends EventEmitter
     close: ->
         @term.emit 'data', '\n\nConnection terminated by server'
         @term.disconnect()
+    
+    resume: ->
+        # Resume
+    
+    pause: ->
+        # Pause
+        
 
 exports.MudClientService = class MudClientService
     constructor: (@mudService, @termService) ->
