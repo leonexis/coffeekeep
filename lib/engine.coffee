@@ -2,13 +2,14 @@ readline = require 'readline'
 {EventEmitter} = require 'events'
 {splitFull} = require './util'
 {format} = require './format'
+{User} = require './model/user'
 
 exports.MudSession = class MudSession extends EventEmitter
     constructor: (@service, @socket) ->
         @world = @service.world
-        @user = @world.users.first()
-        @user.addSession @
-        @inputMode = 'command'
+        @user = null #@world.users.first()
+        #@user.addSession @
+        @inputMode = 'login'
         
         @columns = 80 # TODO: get from terminal, also @emit 'resize' events
         @isTTY = @socket.isTTY
@@ -18,8 +19,8 @@ exports.MudSession = class MudSession extends EventEmitter
             completer: (line, callback) =>
                 @readlineCompleter line, callback
             
-        @updatePrompt()
         @rl.on 'line', (line) =>
+            return if @inputMode isnt 'normal'
             try
                 if line? and line
                     @processCommand line
@@ -31,10 +32,82 @@ exports.MudSession = class MudSession extends EventEmitter
         @rl.on 'SIGINT', -> true
         @rl.on 'SIGTSTP', -> true
         @rl.on 'SIGCONT', -> true
-        #@socket.on 'data', @processData
-        @processCommand 'l'
-        do @rl.prompt
-        #@writePrompt()
+        
+        @on 'login', ->
+            @updatePrompt()
+            @processCommand 'l'
+            do @rl.prompt
+        
+        @socket.on 'close', =>
+            console.log "Socket #{@socket} closed session for #{@user?.id or '(not logged in)'}"
+            @user?.removeSession @
+            @inputMode = 'closed'
+        
+        do @promptForLogin
+        
+    promptForLogin: ->
+        @rl.question "What is thy name, oh fearless coder? ", (username) =>
+            # Does user exist?
+            username = do username.toLowerCase
+            if /[^a-z]/.test username
+                @rl.write "Thy name must only contain letters and no spaces.\r\n"
+                do @promptForLogin
+                return
+        
+            user = @world.users.get username
+            if user?
+                @rl.question "And what is thy secret passphrase? ", (password) =>
+                    if user.checkPassword password
+                        @user = user
+                        @user.addSession @
+                        @inputMode = 'normal'
+                        @emit 'login', user
+                        return
+                    else
+                        @rl.write "You can't fool me!\r\n\r\n"
+                        do @promptForLogin
+                        return
+            else
+                if username.length < 4
+                    @rl.write "That name is too short.\r\n\r\n"
+                    do @promptForLogin
+                    return
+                @rl.write "I have not heard of any tales or legends of #{username}.\r\n"
+                @rl.question "Are you new to these lands? ", (response) =>
+                    if response[0] in ['y', 'Y']
+                        @rl.write "Then welcome, new hero!\r\n"
+                        @inputMode = 'newuser'
+                        @promptForNewPassword username, (password) =>
+                            @inputMode = 'normal'
+                            user = new User
+                                name: username
+                            user.world = @world
+                            user.setPassword password
+                            @world.users.add user
+                            @user = user
+                            @user.addSession @
+                            @emit 'login', user
+                        return
+                    else
+                        @rl.write "Ah, then I must have misheard your name, hero.\r\n\r\n"
+                        do @promptForLogin
+    
+    promptForNewPassword: (username, callback) ->
+        @rl.question "By what phrase do you wish to validate your identity? ", (password) =>
+            if password.length < 6
+                @rl.write "I'm sorry, but anyone could guess that. Perhaps
+ something a bit longer?\r\n"
+                @promptForNewPassword username, callback
+                return
+            @rl.question "Could you repeat that to make sure I have it right? ", (confirmPassword) =>
+                if confirmPassword == password
+                    @rl.write "I'll know you by that phrase then.\r\n"
+                    callback password
+                    return
+                else
+                    @rl.write "I must not have gotten that right.\r\n"
+                    @promptForNewPassword username, callback
+                    return
     
     readlineCompleter: (line, callback) ->
         switch @inputMode
