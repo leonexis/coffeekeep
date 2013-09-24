@@ -1,5 +1,6 @@
 _ = require 'underscore'
 {Model, Collection} = require './'
+{format} = require '../format'
 
 exports.Mob = class Mob extends Model
     @gender:    # Appearance/portraial
@@ -43,7 +44,7 @@ exports.Mob = class Mob extends Model
     write: (data) -> session.write data for session in @sessions
     
     print: (objs...) -> 
-        @write obj.toString() + ' ' for obj in objs
+        @write format obj.toString() + ' ' for obj in objs
         @write '\r\n'
     
     getLocation: ->

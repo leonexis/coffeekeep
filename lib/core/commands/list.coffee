@@ -16,16 +16,16 @@ new Command
         switch verb
             when 'areas'
                 world.areas.forEach (area) ->
-                    mob.print "#{area.id} - #{area.get 'title'}"
+                    mob.print "%c#{area.id}%. - %T#{area.get 'title'}%."
             when 'rooms'
                 area.rooms.forEach (room) ->
-                    mob.print "#{room.id} - #{room.get 'title'}"
+                    mob.print "%c#{room.id}%. - %T#{room.get 'title'}%."
             when 'commands'
                 world.commands.forEach (command) ->
-                    mob.print "#{command.id} - #{command.get 'description'}"
+                    mob.print "%c#{command.id}%. - %T#{command.get 'description'}%."
                     aliases = command.get 'aliases'
                     if aliases? and aliases.length > 0
                         mob.print "  aliases: #{aliases}"
             when 'users'
                 world.users.forEach (user) ->
-                    mob.print "#{user.id} - #{user.get 'shortDescription'}"
+                    mob.print "%c#{user.id}%. - %T#{user.get 'shortDescription'}%."

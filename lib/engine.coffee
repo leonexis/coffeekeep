@@ -1,6 +1,7 @@
 readline = require 'readline'
 {EventEmitter} = require 'events'
 {splitFull} = require './util'
+{format} = require './format'
 
 exports.MudSession = class MudSession extends EventEmitter
     constructor: (@service, @socket) ->
@@ -41,7 +42,10 @@ exports.MudSession = class MudSession extends EventEmitter
             else [[], line]
     
     updatePrompt: ->
-        @rl.setPrompt "##{@user.getLocation().get 'id'}> "
+        prompt = "#%c#{@user.getLocation().get 'id'}%y>%. "
+        color = format prompt
+        length = format(prompt, null, false).length
+        @rl.setPrompt color, length
 
     processCommand: (command) ->
         @user.doCommand command
@@ -97,7 +101,7 @@ exports.MudSession = class MudSession extends EventEmitter
     write: (data) ->
         @socket.write data
     
-    print: (data) ->
+    print: (data...) ->
         @socket.write data + '\r\n'
     
 exports.MudService = class MudService extends EventEmitter
