@@ -14,3 +14,4 @@ exports.Area = class Area extends Model
 
 exports.AreaCollection = class AreaCollection extends Collection
     model: Area
+    urlPart: 'areas'

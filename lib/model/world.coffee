@@ -4,6 +4,8 @@
 {UserCollection} = require './user'
 
 exports.World = class World extends Model
+    url: '/world'
+    
     initialize: ->
         @areas = new AreaCollection @
         @commands = new CommandCollection @

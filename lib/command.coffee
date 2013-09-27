@@ -8,6 +8,9 @@ optimist = require 'optimist'
 
 exports.run = ->
     {ROMReader} = require './readers/rom'
+    {Model, Collection} = require './model'
+    sqlitePlugin = require './core/storage/sqlite' 
+    sqlitePlugin.enable Model, Collection
     
     world = app.get 'coffeekeep world'
     world.users.add
@@ -34,6 +37,7 @@ exports.run = ->
     
     rom.read optimist.argv._[0]
     world.commands.loadDirectory __dirname + '/core/commands'
+    do world.users.fetch
     
 if not module.parent?
     exports.run()

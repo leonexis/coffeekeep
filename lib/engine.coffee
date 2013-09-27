@@ -83,7 +83,7 @@ exports.MudSession = class MudSession extends EventEmitter
                                 name: username
                             user.world = @world
                             user.setPassword password
-                            @world.users.add user
+                            @world.users.create user
                             @user = user
                             @user.addSession @
                             @emit 'login', user

@@ -51,3 +51,4 @@ exports.User = class User extends Mob
 
 exports.UserCollection = class UserCollection extends MobCollection
     model: User
+    urlPart: 'users'

@@ -82,4 +82,5 @@ exports.Mob = class Mob extends Model
 
 exports.MobCollection = class MobCollection extends Collection
     model: Mob
+    urlPart: 'mobs'
     

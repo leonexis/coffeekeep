@@ -15,7 +15,8 @@
 		"jade": ">=0.35.0",
 		"underscore": ">=1.5.2",
 		"term.js": ">=0.0.3",
-		"socket.io": ">=0.9.13"
+		"socket.io": ">=0.9.13",
+		"sqlite3": ">=2.1.17"
 	},
 	"engine": {
 		"node": ">=0.10"
