@@ -2,19 +2,21 @@
 Augment a Backbone Model to use sqlite as the backend storage
 ###
 path = require 'path'
+_ = require 'underscore'
 
-exports.config = config =
-    database: path.resolve __dirname + '/../../../coffeekeep.sqlite'
-    verbose: true
-    
-exports.enable = (Model, Collection) ->
+exports.enable = (options={}) ->
+    _.defaults options, 
+        database: path.resolve "#{__dirname}/../../../coffeekeep.sqlite'"
+        verbose: true
+        
+    {Model, Collection} = require '../../model'
     sqlite3 = require 'sqlite3' # Lazy load
     util = require 'util'
     _ = require 'underscore'
     
-    do sqlite3.verbose
+    do sqlite3.verbose if options.verbose
     
-    db = new sqlite3.Database config.database
+    db = new sqlite3.Database options.database
     
     db.serialize ->
         db.run "CREATE TABLE IF NOT EXISTS objects (url PRIMARY KEY, json)"
@@ -24,7 +26,8 @@ exports.enable = (Model, Collection) ->
         
         url = _.result model, 'url'
         
-        console.log "SYNC: #{url}: #{method}, #{util.inspect model}, #{util.inspect options}"
+        console.log("SYNC: #{url}: #{method}, #{util.inspect model}, "
+                    "#{util.inspect options}")
         if not url?
             throw new Error "Could not get url for this model #{util.inspect model}"
         

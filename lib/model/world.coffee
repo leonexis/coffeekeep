@@ -1,3 +1,4 @@
+util = require 'util'
 {Model, Collection} = require './'
 {AreaCollection} = require './area'
 {CommandCollection} = require './command'
@@ -11,6 +12,14 @@ exports.World = class World extends Model
         @commands = new CommandCollection @
         @users = new UserCollection @
         @world = @
+    
+    startup: (cb) ->
+        @commands.loadDirectory __dirname + '/../core/commands'
+        @users.fetch
+            success: =>
+                console.log "Fetched users: #{util.inspect @users}"
+                do cb
+        
     
     getStartRoom: ->
         area = @world.areas.first()

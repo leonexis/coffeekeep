@@ -16,7 +16,8 @@
 		"underscore": ">=1.5.2",
 		"term.js": ">=0.0.3",
 		"socket.io": ">=0.9.13",
-		"sqlite3": ">=2.1.17"
+		"sqlite3": ">=2.1.17",
+		"async": ">=0.2.9"
 	},
 	"engine": {
 		"node": ">=0.10"

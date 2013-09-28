@@ -38,12 +38,5 @@ app.get '/world/:areaid/:roomid', (req, res) ->
 app.get '/client', (req, res) ->
     res.render 'mudClient'
 
-app.set 'coffeekeep world', new World()
-
-mudService = new MudService app.get 'coffeekeep world'
-
-mudClientIO = io.listen(server, log: false).of '/mudClient'
-mudClientService = new MudClientService mudService, mudClientIO
-
 app.use express.directory "#{__dirname}/../public"
 app.use express.static "#{__dirname}/../public"

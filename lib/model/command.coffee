@@ -27,7 +27,7 @@ exports.Command = class Command extends Model
         @get('action') context, request
     
 exports.CommandCollection = class CommandCollection extends Collection
-    loadDirectory: (dirName) ->
+    loadDirectory: (dirName, cb) ->
         # Load commands from a folder containing commands. Each command file
         # should have `exports.commands` include all commands in the file
         # to be registered

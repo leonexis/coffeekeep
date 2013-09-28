@@ -1,8 +1,11 @@
 readline = require 'readline'
+async = require 'async'
+_ = require 'underscore'
 {EventEmitter} = require 'events'
 {splitFull} = require './util'
 {format} = require './format'
 {User} = require './model/user'
+{World} = require './model/world'
 
 exports.MudSession = class MudSession extends EventEmitter
     constructor: (@service, @socket) ->
@@ -123,54 +126,6 @@ exports.MudSession = class MudSession extends EventEmitter
     processCommand: (command) ->
         @user.doCommand command
         
-    processCommandOld: (command) ->
-        command = command.split()
-        location = @user.getLocation()
-        switch command[0]
-            when 'l', 'look'
-                @print "#{location.get 'title'}"
-                @print "#{location.get 'description'}"
-                @write " exits: "
-                for direction, link of location.get 'links'
-                    @write "#{direction} "
-                @print ''
-            when 'exits'
-                @print "Exits:"
-                for direction, link of location.get 'links'
-                    @write " #{direction} - #{link.description ? 'Nothing special\r\n'}"
-            when 'n', 'e', 's', 'w', 'u', 'd', 'north', 'easth', 'south', 'west', 'up', 'down'
-                direction = switch command[0]
-                    when 'n' then 'north'
-                    when 'e' then 'east'
-                    when 's' then 'south'
-                    when 'w' then 'west'
-                    when 'u' then 'up'
-                    when 'd' then 'down'
-                    else command[0]
-                
-                links = location.get 'links'
-                if not links[direction]?
-                    @print "You can't go that way."
-                else
-                    link = links[direction]
-                    newRoom = location.area.rooms.get link.room
-                    if not newRoom
-                        @print "Room not available!"
-                    else
-                        @user.setLocation newRoom
-                        location = newRoom
-                        @processCommand 'l'
-            when 'goto'
-                if command.length != 2
-                    @print "Must specify room number."
-                newRoom = location.area.rooms.get command[1]
-                if not newRoom?
-                    @print "Room not loaded."
-                else
-                    @user.setLocation newRoom
-                    location = newRoom
-                    @proceesCommand 'l'
-    
     write: (data) ->
         @socket.write data
     
@@ -184,4 +139,92 @@ exports.MudService = class MudService extends EventEmitter
     createSession: (socket) ->
         session = new MudSession @, socket
         @sessions.push session
+    
+
+exports.startMud = (options={}) ->
+    _.defaults options,
+        plugins: 
+            './core/storage/sqlite':
+                database: "#{__dirname}/../coffeekeep.sqlite"
+        web:
+            host: process.env.HOST ? '0.0.0.0'
+            port: process.env.PORT ? 8080
+        telnet:
+            host: process.env.HOST ? '0.0.0.0'
+            port: process.env.TELNET_PORT ? 5555
+    
+    optimist = require 'optimist'    
+    {app, httpServer} = require './app'
+    p = require '../package.json'
+    console.log "Starting CoffeeKeep #{p.version}"
+    
+    world = null
+    async.series [
+        (cb) ->
+            # Load plugins
+            console.log "Loading plugins"
+            for plugin, opts of options.plugins
+                console.log "Starting plugin #{plugin}"
+                mod = require plugin
+                mod.enable? opts
+            do cb
+            
+        (cb) ->
+            # Load our world
+            console.log "Loading coffeekeep world"
+            
+            world = new World()
+            world.fetch
+                success: -> do cb
+                error: (err) -> cb err
+        
+        (cb) ->
+            # Call world startup
+            console.log "Triggering world startup"
+            world.startup (err) ->
+                cb err
+        
+        (cb) ->
+            # Load example area
+            {ROMReader} = require './readers/rom'
+            {Area} = require './model/area'
+            {Room} = require './model/room'
+            {Mob} = require './model/mob'
+            
+            currentArea = null
+            
+            rom = new ROMReader()
+            
+            rom.on 'area', (data) ->
+                currentArea = new Area data
+                world.areas.add currentArea
+            
+            rom.on 'room', (data) ->
+                room = new Room data
+                room.area = currentArea
+                currentArea.rooms.add room
+            
+            rom.on 'done', ->
+                do cb
+            
+            rom.read optimist.argv._[0]
+        
+        (cb) ->
+            # Create web service
+            io = require 'socket.io'
+            {MudClientService} = require './terminal'
+            app.set 'coffeekeep world', world
+
+            mudService = new MudService world
+            
+            mudClientIO = io.listen(httpServer, log: false).of '/mudClient'
+            mudClientService = new MudClientService mudService, mudClientIO
+            
+            httpServer.listen options.web.port, options.web.host, ->
+                console.log "Started web service at #{options.web.host}:#{options.web.port}"
+                do cb
+    ], ->
+        console.log "Startup complete"
+    
+    world
     
