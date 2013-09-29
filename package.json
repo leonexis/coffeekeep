@@ -4,7 +4,7 @@
 	"url": "http://github.com/leonexis/coffeekeep/issues",
 	"version": "0.0.1",
 	"main": "./lib/index.js",
-	"bin": "./bin/viron-server",
+	"bin": "./bin/coffeekeep",
 	"license": "MIT",
 	"dependencies": {
 		"coffee-script": ">=1.6.3",

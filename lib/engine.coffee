@@ -147,10 +147,10 @@ exports.startMud = (options={}) ->
             './core/storage/sqlite':
                 database: "#{__dirname}/../coffeekeep.sqlite"
         web:
-            host: process.env.HOST ? '0.0.0.0'
+            host: process.env.IP ? '0.0.0.0'
             port: process.env.PORT ? 8080
         telnet:
-            host: process.env.HOST ? '0.0.0.0'
+            host: process.env.IP ? '0.0.0.0'
             port: process.env.TELNET_PORT ? 5555
     
     optimist = require 'optimist'    
@@ -185,34 +185,6 @@ exports.startMud = (options={}) ->
                 cb err
         
         (cb) ->
-            # Load example area
-            ###
-            {ROMReader} = require './readers/rom'
-            {Area} = require './model/area'
-            {Room} = require './model/room'
-            {Mob} = require './model/mob'
-            
-            currentArea = null
-            
-            rom = new ROMReader()
-            
-            rom.on 'area', (data) ->
-                currentArea = new Area data
-                world.areas.add currentArea
-            
-            rom.on 'room', (data) ->
-                room = new Room data
-                room.area = currentArea
-                currentArea.rooms.add room
-            
-            rom.on 'done', ->
-                do cb
-            
-            rom.read optimist.argv._[0]
-            ###
-            cb null
-            
-        (cb) ->
             # Create web service
             io = require 'socket.io'
             {MudClientService} = require './terminal'
@@ -223,9 +195,14 @@ exports.startMud = (options={}) ->
             mudClientIO = io.listen(httpServer, log: false).of '/mudClient'
             mudClientService = new MudClientService mudService, mudClientIO
             
-            httpServer.listen options.web.port, options.web.host, ->
-                console.log "Started web service at #{options.web.host}:#{options.web.port}"
-                do cb
+            console.log "Starting web services: #{JSON.stringify options.web}"
+            try
+                httpServer.listen options.web.port, options.web.host, ->
+                    console.log "Started web service at #{options.web.host}:#{options.web.port}"
+                    do cb
+            catch err
+                console.error "Error while starting web services: #{err}"
+                do cb err
     ], ->
         console.log "Startup complete"
     
