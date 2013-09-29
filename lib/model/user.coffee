@@ -8,6 +8,8 @@ exports.User = class User extends Mob
     
     idAttribute: 'name'
     
+    toString: -> "[user #{@id}]"
+    
     setPassword: (password) ->
         crypto = require 'crypto'
         

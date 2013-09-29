@@ -16,6 +16,8 @@ exports.Command = class Command extends Model
         action: (context, request) ->
             {mob} = context
             mob.print "The lazy command does nothing."
+            
+    toString: -> "[command #{@id}]"
     
     doCommand: (context, commandStr, cb) ->
         [verb, args...] = splitFull commandStr
@@ -76,9 +78,7 @@ exports.CommandCollection = class CommandCollection extends Collection
             
             oldCommand = @get command.get 'name'
             if oldCommand?
-                if reload
-                    console.log "Reloaded command '#{command.get 'name'}'"
-                else
+                if not reload
                     console.error "WARNING: Command '#{command.get 'name'}' already
 exists from #{oldCommand.get 'fileName'}. Replacing."
                 oldCommand.set command.attributes
@@ -86,7 +86,6 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
                 
             command.set 'fileName': filename
             @add command
-            console.log "Loaded command '#{command.get 'name'}'"
             return true
         catch error
             console.error "Error while loading commands from #{base}: #{error.toString()}"

@@ -8,7 +8,7 @@ exports.Room = class Room extends Model
         "#{@getArea().id}##{@id}"
         
     toString: ->
-        "[Room #{@getLocationId()}]"
+        "[room #{@getLocationId()}]"
 
 exports.RoomCollection = class RoomCollection extends Collection
     model: Room

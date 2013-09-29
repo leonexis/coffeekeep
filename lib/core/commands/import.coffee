@@ -19,17 +19,16 @@ new Command
         
         rom.on 'area', (data) ->
             currentArea = new Area data
+            world.areas.add currentArea
             mob.print "Creating area %c#{currentArea.id}%."
         
         rom.on 'room', (data) ->
             room = new Room data
             mob.print "Adding room %c#{room.id}%. '%C#{room.get 'title'}%.'"
-            console.log "Adding room %c#{room.id}%. '%C#{room.get 'title'}%.'"
+            console.log "Adding room #{room.id} '#{room.get 'title'}'"
             currentArea.rooms.add room
         
         rom.on 'done', ->
-            world.areas.add currentArea, 
-                isNew: true
             mob.print "Done."
         
         rom.read args[0]

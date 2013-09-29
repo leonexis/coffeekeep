@@ -4,14 +4,36 @@ async = require 'async'
 _ = require 'underscore'
 
 exports.Model = class Model extends backbone.Model
-    autoLoadCollections: []
+    storedCollections: []
     constructor: (args...) ->
+        @lastSync = null
+        
         @on 'add', (model, collection, options) =>
             return unless @ is model
-            do @loadCollections unless options.isNew
+            
+            # If the model was added to a collection via a fetch, make sure to 
+            # set lastSync
+            # FIXME: This seems like a poor way to do it
+            if options.merge
+                @lastSync = do Date.now
+            
+            # If we were loaded from the db, then load our collections
+            do @loadCollections unless do @isNew
+        
+        @on 'sync', (model, collection, options) =>
+            return unless @ is model
+            @lastSync = do Date.now
+            do @saveCollections if options.recursive
+        
+        #@on 'all', (id, model, collections, options) =>
+        #    return unless @ is model
+        #    return if id.indexOf('change') is 0
+        #    console.log "#{do @toString} got event #{id} with options #{util.inspect options}"
             
         super args...
-        
+    
+    isNew: -> not @lastSync?
+    
     url: ->
         # TODO make sure that id is urlescaped!
         if not @collection?
@@ -21,25 +43,37 @@ exports.Model = class Model extends backbone.Model
         containerUrl + @id
 
     loadCollections: (callback) ->
-        loaders = []
-        if @autoLoadCollections.length is 0
-            return
+        return if @storedCollections.length is 0
+        console.log "Loading children for #{do @toString}"
         
-        addLoader = (collection) =>
-            loaders.push (cb) =>
-                @[collection].fetch
+        async.each @storedCollections,
+            (collection, cb) =>
+                @[collection].fetch =>
                     success: =>
                         console.log "Loaded #{@[collection].length} #{collection}"
                         do cb
                     error: (err) =>
                         cb err
-            
-            
-        console.log "Autoloading children for #{do @toString}"
-        for collection in @autoLoadCollections
-            addLoader collection
-
-        async.parallel loaders, (cb) -> callback?()
+            (err) ->
+                callback? err
+    
+    saveCollections: (callback) ->
+        # TODO: account for removed children
+        return if @storedCollections.length is 0
+        
+        console.log "Saving children for #{do @toString}"
+        
+        async.each @storedCollections,
+            (collection, cb) =>
+                async.each @[collection].toArray(), 
+                    (model, cb2) ->
+                        model.save
+                            success: ->
+                                do cb2
+                            error: (err) ->
+                                cb2 err
+                    (err) -> cb err
+            (err) -> callback? err
     
 exports.Collection = class Collection extends backbone.Collection
     constructor: (@parent, args...) ->
@@ -50,6 +84,11 @@ exports.Collection = class Collection extends backbone.Collection
         @on 'remove', (model, collection, options) =>
             return unless collection is @
             model.world = null
+        
+        @on 'sync', (collection, response, options) =>
+            # Make sure lastSync is updated
+            return unless collection is @
+            
         
         @parent.on 'destroy', (model, collection, options) =>
             return unless model is @parent

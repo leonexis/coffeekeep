@@ -34,6 +34,8 @@ exports.Mob = class Mob extends Model
     initialize: ->
         @sessions = []
     
+    toString: -> "[mob #{@id}]"
+    
     addSession: (session) ->
         # Add an open session
         @sessions.push session

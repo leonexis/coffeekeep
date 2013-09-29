@@ -3,7 +3,7 @@
 {MobCollection} = require './mob'
 
 exports.Area = class Area extends Model
-    autoLoadCollections: ['rooms', 'mobs']
+    storedCollections: ['rooms', 'mobs']
     
     initialize: ->
         @rooms = new RoomCollection @

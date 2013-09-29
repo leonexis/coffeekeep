@@ -26,13 +26,20 @@ exports.enable = (options={}) ->
         
         url = _.result model, 'url'
         
-        console.log("SYNC: #{url}: #{method}, #{util.inspect model}, "
-                    "#{util.inspect options}")
+        console.log("SYNC: #{url}: #{method}, #{do model.toString}, "
+                    "#{JSON.stringify options}")
         if not url?
             throw new Error "Could not get url for this model #{util.inspect model}"
         
         switch method
-            when 'create', 'update'
+            when 'create'
+                db.run "INSERT INTO objects VALUES (?, ?)", url, obj, (err) ->
+                    if err?
+                        console.error "Error while creating #{util.inspect err}"
+                        return options.error? err
+                    options.success? null
+            
+            when 'update'
                 obj = JSON.stringify model.attributes
                 db.run "UPDATE objects SET json = ? WHERE url = ?", obj, url, (err) ->
                     if err?
