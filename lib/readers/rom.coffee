@@ -76,7 +76,7 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
                 
                 when 'rooms'
                     current = {}
-                    current.id = String index
+                    current.id = do index.toString
                     current.title = @getString()
                     current.description = @getString()
                     [current.x_obsolete_area, current.x_roomFlags, current.x_sectorType] = @getList()

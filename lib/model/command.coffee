@@ -63,7 +63,10 @@ exports.CommandCollection = class CommandCollection extends Collection
                 sandbox:
                     console: console
                     Command: Command
-                    require: require
+                    require: (id) ->
+                        if id.indexOf '.' == 0
+                            id = path.resolve __dirname, '..', id
+                        require id
             
             command = coffee.eval fs.readFileSync(filename, 'utf8'), evalOptions
             

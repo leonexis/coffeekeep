@@ -28,7 +28,7 @@ exports.MudSession = class MudSession extends EventEmitter
                 if line? and line
                     @processCommand line
             catch error
-                @write "Error while processing command '#{@line}': #{error.toString()}"
+                @write "Error while processing command '#{line}': #{error.toString()}"
                 console.error "Error while processing command: #{error.stack}"
             do @rl.prompt
         
@@ -186,6 +186,7 @@ exports.startMud = (options={}) ->
         
         (cb) ->
             # Load example area
+            ###
             {ROMReader} = require './readers/rom'
             {Area} = require './model/area'
             {Room} = require './model/room'
@@ -208,7 +209,9 @@ exports.startMud = (options={}) ->
                 do cb
             
             rom.read optimist.argv._[0]
-        
+            ###
+            cb null
+            
         (cb) ->
             # Create web service
             io = require 'socket.io'

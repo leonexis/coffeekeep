@@ -1,8 +1,17 @@
 backbone = require 'backbone'
 util = require 'util'
+async = require 'async'
 _ = require 'underscore'
 
 exports.Model = class Model extends backbone.Model
+    autoLoadCollections: []
+    constructor: (args...) ->
+        @on 'add', (model, collection, options) =>
+            return unless @ is model
+            do @loadCollections
+            
+        super args...
+        
     url: ->
         # TODO make sure that id is urlescaped!
         if not @collection?
@@ -10,6 +19,27 @@ exports.Model = class Model extends backbone.Model
             return null
         containerUrl = _.result @collection, 'url'
         containerUrl + @id
+
+    loadCollections: (callback) ->
+        loaders = []
+        if @autoLoadCollections.length is 0
+            return
+        
+        addLoader = (collection) =>
+            loaders.push (cb) =>
+                @[collection].fetch
+                    success: =>
+                        console.log "Loaded #{@[collection].length} #{collection}"
+                        do cb
+                    error: (err) =>
+                        cb err
+            
+            
+        console.log "Autoloading children for #{do @toString}"
+        for collection in @autoLoadCollections
+            addLoader collection
+
+        async.parallel loaders, (cb) -> callback?()
     
 exports.Collection = class Collection extends backbone.Collection
     constructor: (@parent, args...) ->

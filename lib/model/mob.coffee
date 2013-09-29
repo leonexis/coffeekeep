@@ -76,7 +76,7 @@ exports.Mob = class Mob extends Model
             mob: @
             room: room
             world: @world
-            area: room.area
+            area: do room.getArea
             
         @world.commands.doCommand context, commandStr
 

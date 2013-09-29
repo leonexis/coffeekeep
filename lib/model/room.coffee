@@ -1,8 +1,11 @@
 {Model, Collection} = require './'
 
 exports.Room = class Room extends Model
+    getArea: ->
+        @collection.parent
+        
     getLocationId: ->
-        "#{@area.id}##{@id}"
+        "#{@getArea().id}##{@id}"
         
     toString: ->
         "[Room #{@getLocationId()}]"

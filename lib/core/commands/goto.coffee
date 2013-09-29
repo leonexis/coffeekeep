@@ -11,11 +11,12 @@ new Command
         roomId = args[0]
         if '#' in roomId
             [areaId, roomId] = roomId.split '#'
-            newArea = world.areas.get 'areaId'
+            mob.print "Going to #{JSON.stringify areaId} room #{JSON.stringify roomId}"
+            newArea = world.areas.get areaId
             if not newArea?
                 mob.print "That area is not loaded or does not exist."
                 return
-            newRoom = newArea.get roomId
+            newRoom = newArea.rooms.get roomId
             if not newRoom?
                 mob.print "That room doesn't exist in that area."
                 return
