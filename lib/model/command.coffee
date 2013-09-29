@@ -19,14 +19,19 @@ exports.Command = class Command extends Model
             
     toString: -> "[command #{@id}]"
     
-    doCommand: (context, commandStr, cb) ->
+    doCommand: (context, commandStr, callback) ->
         [verb, args...] = splitFull commandStr
         verb = verb.toLowerCase()
         request =
             verb: verb
             args: args
             line: commandStr
-        @get('action') context, request
+        action = @get('action')
+        if action.length < 3
+            action context, request
+            do callback
+        else
+            action context, request, callback
     
 exports.CommandCollection = class CommandCollection extends Collection
     loadDirectory: (dirName, cb) ->
@@ -92,7 +97,7 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
             console.error error.stack
             return false
     
-    doCommand: (context, commandStr) ->
+    doCommand: (context, commandStr, callback) ->
         [verb, args...] = splitFull commandStr
         commandModel = @get verb
         if not commandModel?
@@ -111,7 +116,7 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
             context.mob.print "I don't know how to #{verb}."
             return
         
-        commandModel.doCommand context, commandStr
+        commandModel.doCommand context, commandStr, callback
     
     updateValidCommands: ->
         console.log "Updating valid commands"

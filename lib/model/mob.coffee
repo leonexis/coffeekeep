@@ -72,7 +72,8 @@ exports.Mob = class Mob extends Model
         # TODO Add/remove quick lookups to area/room
         @set 'currentLocation', room.getLocationId()
     
-    doCommand: (commandStr) ->
+    doCommand: (commandStr, callback) ->
+        callback ?= ->
         room = @getLocation()
         context = 
             mob: @
@@ -80,7 +81,7 @@ exports.Mob = class Mob extends Model
             world: @world
             area: do room.getArea
             
-        @world.commands.doCommand context, commandStr
+        @world.commands.doCommand context, commandStr, callback
 
 exports.MobCollection = class MobCollection extends Collection
     model: Mob

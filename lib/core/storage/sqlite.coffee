@@ -33,6 +33,7 @@ exports.enable = (options={}) ->
         
         switch method
             when 'create'
+                obj = JSON.stringify model.attributes
                 db.run "INSERT INTO objects VALUES (?, ?)", url, obj, (err) ->
                     if err?
                         console.error "Error while creating #{util.inspect err}"

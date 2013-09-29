@@ -26,20 +26,26 @@ exports.MudSession = class MudSession extends EventEmitter
             return if @inputMode isnt 'normal'
             try
                 if line? and line
-                    @processCommand line
+                    @processCommand line, (err) =>
+                        if err?
+                            @write "Error while processing command '#{line}': #{error.toString()}"
+                            console.error "Error while processing command: #{error.stack}"
+                            # Note, no return here
+                            
+                        do @rl.prompt
             catch error
                 @write "Error while processing command '#{line}': #{error.toString()}"
                 console.error "Error while processing command: #{error.stack}"
-            do @rl.prompt
+                do @rl.prompt
         
         @rl.on 'SIGINT', -> true
         @rl.on 'SIGTSTP', -> true
         @rl.on 'SIGCONT', -> true
         
-        @on 'login', ->
+        @on 'login', =>
             @updatePrompt()
-            @processCommand 'l'
-            do @rl.prompt
+            @processCommand 'l', =>
+                do @rl.prompt
         
         @socket.on 'close', =>
             console.log "Socket #{@socket} closed session for #{@user?.id or '(not logged in)'}"
@@ -123,8 +129,8 @@ exports.MudSession = class MudSession extends EventEmitter
         length = format(prompt, null, false).length
         @rl.setPrompt color, length
 
-    processCommand: (command) ->
-        @user.doCommand command
+    processCommand: (command, callback) ->
+        @user.doCommand command, callback
         
     write: (data) ->
         @socket.write data
