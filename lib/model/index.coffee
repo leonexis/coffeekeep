@@ -8,7 +8,7 @@ exports.Model = class Model extends backbone.Model
     constructor: (args...) ->
         @on 'add', (model, collection, options) =>
             return unless @ is model
-            do @loadCollections
+            do @loadCollections unless options.isNew
             
         super args...
         
