@@ -19,7 +19,7 @@ new Command
         salt = ""
         salt += Math.random().toString(36).substr(2) while salt.length < 8
         salt = salt.substr 0,8
-        
+
         tohash = salt + password
         outtext = hashtype + ":" + currentver + ":" + salt + ":"
         
