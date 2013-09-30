@@ -1,4 +1,4 @@
-readline = require 'readline'
+readline = require './readline'
 async = require 'async'
 _ = require 'underscore'
 {EventEmitter} = require 'events'
@@ -8,6 +8,8 @@ _ = require 'underscore'
 {World} = require './model/world'
 
 exports.MudSession = class MudSession extends EventEmitter
+    # TODO: allow "frontend" between mud session and terminal, for example
+    # using blessed for curses support
     constructor: (@service, @socket) ->
         @world = @service.world
         @user = null #@world.users.first()
@@ -59,13 +61,16 @@ exports.MudSession = class MudSession extends EventEmitter
             # Does user exist?
             username = do username.toLowerCase
             if /[^a-z]/.test username
-                @rl.write "Thy name must only contain letters and no spaces.\r\n"
+                @write "Thy name must only contain letters and no spaces.\r\n"
                 do @promptForLogin
                 return
         
             user = @world.users.get username
             if user?
+                @rl.setEcho off
                 @rl.question "And what is thy secret passphrase? ", (password) =>
+                    console.log "Got password '#{JSON.stringify password}'"
+                    @rl.setEcho on
                     if user.checkPassword password
                         @user = user
                         @user.addSession @
@@ -73,7 +78,7 @@ exports.MudSession = class MudSession extends EventEmitter
                         @emit 'login', user
                         return
                     else
-                        @rl.write "You can't fool me!\r\n\r\n"
+                        @write "You can't fool me!\r\n\r\n"
                         do @promptForLogin
                         return
             else
@@ -81,10 +86,10 @@ exports.MudSession = class MudSession extends EventEmitter
                     @rl.write "That name is too short.\r\n\r\n"
                     do @promptForLogin
                     return
-                @rl.write "I have not heard of any tales or legends of #{username}.\r\n"
+                @write "I have not heard of any tales or legends of #{username}.\r\n"
                 @rl.question "Are you new to these lands? ", (response) =>
                     if response[0] in ['y', 'Y']
-                        @rl.write "Then welcome, new hero!\r\n"
+                        @write "Then welcome, new hero!\r\n"
                         @inputMode = 'newuser'
                         @promptForNewPassword username, (password) =>
                             @inputMode = 'normal'
@@ -98,23 +103,27 @@ exports.MudSession = class MudSession extends EventEmitter
                             @emit 'login', user
                         return
                     else
-                        @rl.write "Ah, then I must have misheard your name, hero.\r\n\r\n"
+                        @write "Ah, then I must have misheard your name, hero.\r\n\r\n"
                         do @promptForLogin
     
     promptForNewPassword: (username, callback) ->
+        @rl.setEcho off
         @rl.question "By what phrase do you wish to validate your identity? ", (password) =>
+            @rl.setEcho on
             if password.length < 6
-                @rl.write "I'm sorry, but anyone could guess that. Perhaps
+                @write "I'm sorry, but anyone could guess that. Perhaps
  something a bit longer?\r\n"
                 @promptForNewPassword username, callback
                 return
+            @rl.setEcho off
             @rl.question "Could you repeat that to make sure I have it right? ", (confirmPassword) =>
+                @rl.setEcho on
                 if confirmPassword == password
-                    @rl.write "I'll know you by that phrase then.\r\n"
+                    @write "I'll know you by that phrase then.\r\n"
                     callback password
                     return
                 else
-                    @rl.write "I must not have gotten that right.\r\n"
+                    @write "I must not have gotten that right.\r\n"
                     @promptForNewPassword username, callback
                     return
     
