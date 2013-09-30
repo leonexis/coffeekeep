@@ -1,3 +1,25 @@
+###
+# Readline Extensions #
+Extends Node.JS's internal readline library to allow for disabling local
+echos for entering passwords or other screts.
+
+## Usage ##
+Use like you would the original readline library.
+
+## Enable and Disable Echo ##
+Use the following form when asking for a password:
+
+    # rl = new readline.Interface ...
+    rl.setEcho off
+    rl.question "Enter a password: ", (password) ->
+        rl.setEcho on
+        console.log "Entered password #{password}"
+
+## History ##
+If the echo mode is not `ECHO_NORMAL`, input is prevented from being added
+to the history for security purposes
+        
+###
 readline = require 'readline'
 
 exports.ECHO_NORMAL = ECHO_NORMAL = 0
@@ -5,36 +27,23 @@ exports.ECHO_SECRET = ECHO_SECRET = 1
 exports.ECHO_CENSOR = ECHO_CENSOR = 2
 
 exports.Interface = class Interface extends readline.Interface
-    ###
-    # Readline Extensions #
-    Extends Node.JS's internal readline library to allow for disabling local
-    echos for entering passwords or other screts.
-    
-    ## Enable and Disable Echo ##
-    Use the following form when asking for a password:
-    
-        interface.setEcho off
-        interface.question "Enter a password: ", (password) ->
-            interface.setEcho on
-            console.log "Entered password #{password}"
-    
-    Other options for `#setEcho` include
-    
-     - 'normal' - Enables normal mode
-     - 'secret' - Do not echo anything
-     - 'censor' - Echo '*' for each character entered
-    
-    ## History ##
-    If the echo mode is not ECHO_NORMAL, input is prevented from being added
-    to the history for security purposes
-    
-    ###
     # Extend Node.JS Readline interface
     constructor: (options) ->
         @echoMode = ECHO_NORMAL
         super options
     
     setEcho: (setting) ->
+        ###
+        Set the echo mode.
+        
+        `setting` can be one of:
+        
+         - `'normal'` - Enables normal mode
+         - `'secret'` - Do not echo anything
+         - `'censor'` - Echo '*' for each character entered
+        
+        
+        ###
         @echoMode = switch setting
             when 'normal', true, ECHO_NORMAL then ECHO_NORMAL
             when 'secret', false, ECHO_SECRET then ECHO_SECRET
