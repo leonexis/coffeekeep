@@ -150,6 +150,7 @@ exports.MudSession = class MudSession extends EventEmitter
     setPrompt: (prompt) -> @rl.setPrompt prompt, length
     prompt: -> @rl.prompt
     question: (query, callback) -> @rl.question query, callback
+    setEcho: (echo) -> @rl.setEcho echo
     
     
 exports.MudService = class MudService extends EventEmitter
