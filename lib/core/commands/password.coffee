@@ -3,26 +3,36 @@ new Command
     aliases: ['pword']
     description: "Changes the password on the current account."
     help: "Usage: password [old password] [new password]"
-    action: (context, request) ->
-        {mob, room, world, area} = context
+    action: (context, request, callback) ->
+        {mob, room, session} = context
         {verb, args} = request
         
-        currentlogin = mob.id
-        
-        if args.length < 2
-            mob.print "\r\nYou must enter the old password and the new password (see help for details).\r\n"
-            return
-        
-        oldpass = args[0]
-        newpass = args[1]
-        
-        usertoedit = world.users.get currentlogin
-        
-        if not (usertoedit.checkPassword oldpass)
-            mob.print "\r\nThe old password was not correct. Please check it and try again.\r\n"
-            return
-            
-        usertoedit.setPassword newpass
-        mob.print "\r\nPassword successfully changed!\r\n"
-        mob.save
-        
+        session.setEcho 'secret'
+        session.question "Old password: ", (response) ->
+            if not mob.checkPassword response
+                mob.print "That password is incorrect. Please try again."
+                session.setEcho 'normal'
+                return do callback
+            else
+                session.question "New Password: ", (response) ->
+                    if not response
+                        mob.print "Empty passwords are not allowed. Please try again."
+                        session.setEcho 'normal'
+                        return do callback
+                        
+                    session.question "New Password (Again): ", (response2) ->
+                        if not response2
+                            mob.print "The second password was empty. Please try again."
+                            session.setEcho 'normal'
+                            return do callback
+                            
+                        if not (response == response2)
+                            mob.print "Passwords did not match."
+                            session.setEcho 'normal'
+                            return do callback
+                        else
+                            mob.setPassword response
+                            mob.print "Password was changed successfully."
+                            session.setEcho 'normal'
+                            return do callback
+                    
