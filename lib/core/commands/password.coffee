@@ -2,7 +2,7 @@ new Command
     name: 'password'
     aliases: ['pword']
     description: "Changes the password on the current account."
-    help: "Usage: password [old password] [new password]"
+    help: "Usage: password"
     action: (context, request, callback) ->
         {mob, room, session} = context
         {verb, args} = request
