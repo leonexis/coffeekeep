@@ -118,3 +118,9 @@ exports.format = format = (text, theme, color=true) ->
             out += char
     out
 
+exports.unformat = unformat = (text) ->
+    ### 
+    Converts a string with command codes in to a raw string without them
+    ###
+    text.replace /\x1b\[[\d:;]+[a-zA-Z]/g, ''
+

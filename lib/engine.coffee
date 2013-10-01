@@ -69,7 +69,6 @@ exports.MudSession = class MudSession extends EventEmitter
             if user?
                 @rl.setEcho off
                 @rl.question "And what is thy secret passphrase? ", (password) =>
-                    console.log "Got password '#{JSON.stringify password}'"
                     @rl.setEcho on
                     if user.checkPassword password
                         @user = user
@@ -135,17 +134,23 @@ exports.MudSession = class MudSession extends EventEmitter
     updatePrompt: ->
         prompt = "#%c#{@user.getLocation().get 'id'}%y>%. "
         color = format prompt
-        length = format(prompt, null, false).length
-        @rl.setPrompt color, length
+        @rl.setPrompt color
 
     processCommand: (command, callback) ->
-        @user.doCommand command, callback
+        context =
+            session: @
+        @user.doCommand context, command, callback
         
     write: (data) ->
         @socket.write data
     
     print: (data...) ->
         @socket.write data + '\r\n'
+    
+    setPrompt: (prompt) -> @rl.setPrompt prompt, length
+    prompt: -> @rl.prompt
+    question: (query, callback) -> @rl.question query, callback
+    
     
 exports.MudService = class MudService extends EventEmitter
     constructor: (@world) ->

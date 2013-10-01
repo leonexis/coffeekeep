@@ -72,10 +72,20 @@ exports.Mob = class Mob extends Model
         # TODO Add/remove quick lookups to area/room
         @set 'currentLocation', room.getLocationId()
     
-    doCommand: (commandStr, callback) ->
+    doCommand: (context, commandStr, callback) ->
+        # Possible signatures:
+        # (commandStr<String>)
+        # (commandStr<String>, callback<Function>)
+        # (context<Object>, commandStr<String>)
+        # (context<Object>, commandStr<String>, callback<Function>)
+        if _.isString context
+            callback = commandStr
+            commandStr = context
+            context = {}
+            
         callback ?= ->
         room = @getLocation()
-        context = 
+        _.defaults context, 
             mob: @
             room: room
             world: @world

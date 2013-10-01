@@ -21,6 +21,7 @@ to the history for security purposes
         
 ###
 readline = require 'readline'
+format = require './format'
 
 exports.ECHO_NORMAL = ECHO_NORMAL = 0
 exports.ECHO_SECRET = ECHO_SECRET = 1
@@ -86,4 +87,10 @@ exports.Interface = class Interface extends readline.Interface
     _addHistory: -> 
         return super if @echoMode is ECHO_NORMAL
         @line
+    
+    setPrompt: (prompt) ->
+        # This is fixed in a development version of Node, but for v0.10....
+        # Adapted from readline.js from https://github.com/joyent/node
+        cleanPrompt = format.unformat prompt
+        super prompt, cleanPrompt.length
     
