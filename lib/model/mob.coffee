@@ -56,9 +56,9 @@ exports.Mob = class Mob extends Model
     
     write: (data) -> session.write data for session in @sessions
     
-    print: (objs...) -> 
-        @write format obj.toString() + ' ' for obj in objs
-        @write '\r\n'
+    print: (objs...) ->
+        for session in @sessions
+            session.print format obj.toString() + ' ' for obj in objs
     
     getLocation: ->
         # Get a reference to the room that the mob is in
@@ -103,7 +103,7 @@ exports.Mob = class Mob extends Model
             area: do room.getArea
             
         @world.commands.doCommand context, commandStr, callback
-
+        
 exports.MobCollection = class MobCollection extends Collection
     model: Mob
     urlPart: 'mobs'

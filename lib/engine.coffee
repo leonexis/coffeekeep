@@ -15,6 +15,7 @@ exports.MudSession = class MudSession extends EventEmitter
         @user = null #@world.users.first()
         #@user.addSession @
         @inputMode = 'login'
+        @promptDirty = false
         
         @columns = 80 # TODO: get from terminal, also @emit 'resize' events
         @isTTY = @socket.isTTY
@@ -32,22 +33,22 @@ exports.MudSession = class MudSession extends EventEmitter
                         if err?
                             @write "Error while processing command '#{line}': #{error.toString()}"
                             console.error "Error while processing command: #{error.stack}"
-                            # Note, no return here
-                            
-                        do @rl.prompt
+                            do @updatePrompt
+                else
+                    # Blank line, redisplay prompt
+                    do @updatePrompt
             catch error
                 @write "Error while processing command '#{line}': #{error.toString()}"
                 console.error "Error while processing command: #{error.stack}"
-                do @rl.prompt
+                do @updatePrompt
         
         @rl.on 'SIGINT', -> true
         @rl.on 'SIGTSTP', -> true
         @rl.on 'SIGCONT', -> true
         
         @on 'login', =>
-            @updatePrompt()
-            @processCommand 'l', =>
-                do @rl.prompt
+            @user.getLocation()
+            @processCommand 'l'
         
         @socket.on 'close', =>
             console.log "Socket #{@socket} closed session for #{@user?.id or '(not logged in)'}"
@@ -132,19 +133,30 @@ exports.MudSession = class MudSession extends EventEmitter
             else [[], line]
     
     updatePrompt: ->
-        prompt = "#%c#{@user.getLocation().get 'id'}%y>%. "
+        prompt = "%c#{@user.get 'currentLocation'}%y>%. "
         color = format prompt
         @rl.setPrompt color
+        @rl.prompt()
 
     processCommand: (command, callback) ->
         context =
             session: @
-        @user.doCommand context, command, callback
+        
+        callback ?= ->
+            
+        @user.doCommand context, command, (err, args...) =>
+            if @promptDirty
+                @updatePrompt()
+                @promptDirty = false
+            callback err, args...
         
     write: (data) ->
         @socket.write data
     
     print: (data...) ->
+        if not @promptDirty
+            @socket.write '\r\n'
+            @promptDirty = true
         @socket.write data + '\r\n'
     
     setPrompt: (prompt) -> @rl.setPrompt prompt, length
