@@ -71,7 +71,7 @@ exports.CommandCollection = class CommandCollection extends Collection
                     console: console
                     Command: Command
                     require: (id) ->
-                        if id.indexOf '.' == 0
+                        if id.indexOf('.') == 0
                             id = path.resolve __dirname, '..', id
                         require id
             

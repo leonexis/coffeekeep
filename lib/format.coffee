@@ -96,6 +96,7 @@ exports.FORMAT_CODES = FORMAT_CODES =
     'd': themed 'door'
     'D': themed 'unexploredDoor'
     'S': themed 'system'
+    'm': themed 'mob'
     
 exports.format = format = (text, theme, color=true) ->
     theme ?= defaultTheme

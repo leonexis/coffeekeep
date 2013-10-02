@@ -36,6 +36,17 @@ exports.Mob = class Mob extends Model
     
     toString: -> "[mob #{@id}]"
     
+    getDisplayText: (context) ->
+        if context?.mob? and context.mob is @
+            return "You stand here."
+            
+        title = @get 'shortDescription'
+        title ?= @get 'name'
+        title ?= 'someone'
+        title = title[0].toUpperCase() + title[1..]
+        title += ' stands here.'
+        title
+    
     addSession: (session) ->
         # Add an open session
         @sessions.push session
