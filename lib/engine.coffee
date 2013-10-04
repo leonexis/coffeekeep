@@ -16,7 +16,8 @@ exports.MudSession = class MudSession extends EventEmitter
         #@user.addSession @
         @inputMode = 'login'
         @promptDirty = false
-        
+        @inCommand = false
+
         @columns = 80 # TODO: get from terminal, also @emit 'resize' events
         @isTTY = @socket.isTTY
         @rl = new readline.Interface
@@ -24,7 +25,7 @@ exports.MudSession = class MudSession extends EventEmitter
             output: @
             completer: (line, callback) =>
                 @readlineCompleter line, callback
-            
+
         @rl.on 'line', (line) =>
             return if @inputMode isnt 'normal'
             try
@@ -41,22 +42,22 @@ exports.MudSession = class MudSession extends EventEmitter
                 @write "Error while processing command '#{line}': #{error.toString()}"
                 console.error "Error while processing command: #{error.stack}"
                 do @updatePrompt
-        
+
         @rl.on 'SIGINT', -> true
         @rl.on 'SIGTSTP', -> true
         @rl.on 'SIGCONT', -> true
-        
+
         @on 'login', =>
             @user.getLocation()
             @processCommand 'l'
-        
+
         @socket.on 'close', =>
             console.log "Socket #{@socket} closed session for #{@user?.id or '(not logged in)'}"
             @user?.removeSession @
             @inputMode = 'closed'
-        
+
         do @promptForLogin
-        
+
     promptForLogin: ->
         @rl.question "What is thy name, oh fearless coder? ", (username) =>
             # Does user exist?
@@ -65,7 +66,7 @@ exports.MudSession = class MudSession extends EventEmitter
                 @write "Thy name must only contain letters and no spaces.\r\n"
                 do @promptForLogin
                 return
-        
+
             user = @world.users.get username
             if user?
                 @rl.setEcho off
@@ -105,7 +106,7 @@ exports.MudSession = class MudSession extends EventEmitter
                     else
                         @write "Ah, then I must have misheard your name, hero.\r\n\r\n"
                         do @promptForLogin
-    
+
     promptForNewPassword: (username, callback) ->
         @rl.setEcho off
         @rl.question "By what phrase do you wish to validate your identity? ", (password) =>
@@ -126,12 +127,12 @@ exports.MudSession = class MudSession extends EventEmitter
                     @write "I must not have gotten that right.\r\n"
                     @promptForNewPassword username, callback
                     return
-    
+
     readlineCompleter: (line, callback) ->
         switch @inputMode
             when 'command' then @world.commands.readlineCompleter line, callback
             else [[], line]
-    
+
     updatePrompt: ->
         prompt = "%c#{@user.get 'currentLocation'}%y>%. "
         color = format prompt
@@ -139,44 +140,60 @@ exports.MudSession = class MudSession extends EventEmitter
         @rl.prompt()
 
     processCommand: (command, callback) ->
+        @inCommand = true
         context =
             session: @
-        
+
         callback ?= ->
-            
+
         @user.doCommand context, command, (err, args...) =>
+            @inCommand = false
             if @promptDirty
                 @updatePrompt()
                 @promptDirty = false
             callback err, args...
-        
+
     write: (data) ->
         @socket.write data
-    
+
     print: (data...) ->
         if not @promptDirty
-            @socket.write '\r\n'
+            if @isTTY
+                # Go to the beginning of the line, clear the line, assuming
+                # the current line is the prompt...
+                @socket.write '\x1b[0G\x1b[2K'
+            else
+                @socket.write '\r\n'
+
+            @rl.needsRefresh = true
             @promptDirty = true
         @socket.write data + '\r\n'
-    
+
+        if not @inCommand
+            # Unprovoked print to the session, like a chat or fight message
+            # refresh the prompt afterwards
+            @rl.needsRefresh = false
+            do @rl._refreshLine
+            @promptDirty = false
+
     setPrompt: (prompt) -> @rl.setPrompt prompt, length
     prompt: -> @rl.prompt
     question: (query, callback) -> @rl.question query, callback
     setEcho: (echo) -> @rl.setEcho echo
-    
-    
+
+
 exports.MudService = class MudService extends EventEmitter
     constructor: (@world) ->
         @sessions = []
-    
+
     createSession: (socket) ->
         session = new MudSession @, socket
         @sessions.push session
-    
+
 
 exports.startMud = (options={}) ->
     _.defaults options,
-        plugins: 
+        plugins:
             './core/storage/sqlite':
                 database: "#{__dirname}/../coffeekeep.sqlite"
         web:
@@ -185,12 +202,12 @@ exports.startMud = (options={}) ->
         telnet:
             host: process.env.IP ? '0.0.0.0'
             port: process.env.TELNET_PORT ? 5555
-    
-    optimist = require 'optimist'    
+
+    optimist = require 'optimist'
     {app, httpServer} = require './app'
     p = require '../package.json'
     console.log "Starting CoffeeKeep #{p.version}"
-    
+
     world = null
     async.series [
         (cb) ->
@@ -201,22 +218,22 @@ exports.startMud = (options={}) ->
                 mod = require plugin
                 mod.enable? opts
             do cb
-            
+
         (cb) ->
             # Load our world
             console.log "Loading coffeekeep world"
-            
+
             world = new World()
             world.fetch
                 success: -> do cb
                 error: (err) -> cb err
-        
+
         (cb) ->
             # Call world startup
             console.log "Triggering world startup"
             world.startup (err) ->
                 cb err
-        
+
         (cb) ->
             # Create web service
             io = require 'socket.io'
@@ -224,10 +241,10 @@ exports.startMud = (options={}) ->
             app.set 'coffeekeep world', world
 
             mudService = new MudService world
-            
+
             mudClientIO = io.listen(httpServer, log: false).of '/mudClient'
             mudClientService = new MudClientService mudService, mudClientIO
-            
+
             console.log "Starting web services: #{JSON.stringify options.web}"
             try
                 httpServer.listen options.web.port, options.web.host, ->
@@ -238,6 +255,5 @@ exports.startMud = (options={}) ->
                 do cb err
     ], ->
         console.log "Startup complete"
-    
+
     world
-    

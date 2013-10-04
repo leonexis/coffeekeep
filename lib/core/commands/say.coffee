@@ -22,4 +22,4 @@ new Command
                 verb += "s, '"
                 
         for othermob in room.getMobs()
-            othermob.print "\r\n    %g#{speaker} #{verb}#{message}'%."
+            othermob.print "%g#{speaker} #{verb}#{message}'%."

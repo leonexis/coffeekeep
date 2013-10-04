@@ -18,7 +18,7 @@ Use the following form when asking for a password:
 ## History ##
 If the echo mode is not `ECHO_NORMAL`, input is prevented from being added
 to the history for security purposes
-        
+
 ###
 readline = require 'readline'
 format = require './format'
@@ -31,27 +31,29 @@ exports.Interface = class Interface extends readline.Interface
     # Extend Node.JS Readline interface
     constructor: (options) ->
         @echoMode = ECHO_NORMAL
+        @needsRefresh = false
         super options
-    
+
     setEcho: (setting) ->
         ###
         Set the echo mode.
-        
+
         `setting` can be one of:
-        
+
          - `'normal'` - Enables normal mode
          - `'secret'` - Do not echo anything
          - `'censor'` - Echo '*' for each character entered
-        
-        
+
+
         ###
         @echoMode = switch setting
             when 'normal', true, ECHO_NORMAL then ECHO_NORMAL
             when 'secret', false, ECHO_SECRET then ECHO_SECRET
             when 'censor', ECHO_CENSOR then ECHO_CENSOR
             else ECHO_NORMAL
-    
+
     _refreshLine: ->
+        @needsRefresh = false
         return super if @echoMode is ECHO_NORMAL
         line = @line
         cursor = @cursor
@@ -64,10 +66,10 @@ exports.Interface = class Interface extends readline.Interface
         super
         @line = line
         @cursor = cursor
-    
+
     _insertString: (c) ->
-        return super c if @echoMode is ECHO_NORMAL
-        
+        return super c if not @needsRefresh and @echoMode is ECHO_NORMAL
+
         # Adapted from Node.JS's readline to always refresh with @_refreshLine
         if @cursor < @line.length
             beg = @line[...@cursor]
@@ -77,20 +79,19 @@ exports.Interface = class Interface extends readline.Interface
         else
             @line += c
             @cursor += c.length
-        
+
         if @echoMode isnt ECHO_SECRET
             # dont bother refreshing if we aren't going to change anything
             do @_refreshLine
-    
+
     _tabComplete: -> super if @echoMode is ECHO_NORMAL
-    
-    _addHistory: -> 
+
+    _addHistory: ->
         return super if @echoMode is ECHO_NORMAL
         @line
-    
+
     setPrompt: (prompt) ->
         # This is fixed in a development version of Node, but for v0.10....
         # Adapted from readline.js from https://github.com/joyent/node
         cleanPrompt = format.unformat prompt
         super prompt, cleanPrompt.length
-    
