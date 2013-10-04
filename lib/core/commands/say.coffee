@@ -1,3 +1,5 @@
+{Message} = require './format'
+
 new Command
     name: 'say'
     aliases: ['yell', 'growl']
@@ -14,12 +16,12 @@ new Command
         switch verb
             when 'yell'
                 message = message.toUpperCase()
-                verb += "s, '"
             when 'growl'
                 message = message.toLowerCase()
-                verb += "s, '"
-            else
-                verb += "s, '"
+
+        msg = new Message
+            subject: mob
+            message: "%g{Name} #{verb}{s} '#{message}'%."
 
         for othermob in room.getMobs()
-            othermob.print "%g#{speaker} #{verb}#{message}'%."
+            othermob.print msg.forObserver othermob

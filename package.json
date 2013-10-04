@@ -18,7 +18,9 @@
 		"socket.io": ">=0.9.13",
 		"sqlite3": ">=2.1.17",
 		"async": ">=0.2.9",
-		"coffeedoc": ">=0.2.11"
+		"coffeedoc": ">=0.2.11",
+		"mocha": ">=1.13.0",
+		"should": ">=1.3.0"
 	},
 	"engine": {
 		"node": ">=0.10"

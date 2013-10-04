@@ -3,13 +3,15 @@ _ = require 'underscore'
 {format} = require '../format'
 
 exports.Mob = class Mob extends Model
-    @gender:    # Appearance/portraial
+    @gender:    # Appearance/portraial. NOTE: these numbers are used for formatting
         genderless: 0   # No gender traits possbible
         male: 1         # Treated like biological male, even if not open trans
         female: 2       # Treated like biological female, even if non open trans
-        transman: 3     # Openly transgender man. Uses male pronouns, but profile shows transman
-        transwoman: 4   # Openly transgender woman. Uses female pronouns, but profile shows transwoman
-        androgynous: 5  # Wishes to portray no gender. Uses alternate pronouns: zhe/zher(s)
+        androgynous: 3  # Wishes to portray no gender. Uses alternate pronouns: zhe/zher(s)
+        # Can have alternate gender that uses genderless pronouns as #4
+        transman: 5     # Openly transgender man. Uses male pronouns, but profile shows transman
+        transwoman: 6   # Openly transgender woman. Uses female pronouns, but profile shows transwoman
+        # Can have alternate gender that uses androgynous as #7
 
     @sex:       # Sexual mechanic
         none: 0         # No sexual mechanic

@@ -1,3 +1,4 @@
+_ = require 'underscore'
 
 exports.CSI = CSI = '\x1b'
 
@@ -125,3 +126,142 @@ exports.unformat = unformat = (text) ->
     ###
     text.replace /\x1b\[[\d:;]+[a-zA-Z]/g, ''
 
+
+class Message
+    ###
+    ## Message Format
+    Tokens surrounded by `{}` are replaced with the appropriate term that
+    represents the subject. If the token is prepended by `^`, the token refers
+    to the target. The capitalization of the first letter determines if the
+    replaced term should also be initially capitalized.
+
+     - `{he}` - He, She, Zhe, It, or You
+     - `{his}` - His, Her, Zher, Its, or Your
+     - `{him}` - Him, Her, Zher, It, or You
+     - `{himself}` - Himself, Herself, Zherself, Yourself
+     - `{hisself}` - Hisself, Herself, Zherself, Yourself
+     - `{name}` - You, or the Name
+     - `{nameself}` - Yourself, or the Name
+     - `{name's}` - Name's or Your
+     - `{is}` - Is, or Are
+     - `{has}` - Has, or Have
+     - `{s}`, `{es}` - Shown if previous token was not the observer
+
+    ## Combinations
+
+     - `{He} hit {himself}` - `You hit yourself`, `He hit himself`
+     - `{He} hit {^him}` - `You hit him`, `He hit you`, `He hit him`
+     - `{Name} maim{s} {^name}` - `Leonexis maims a goblin`, `You maim a goblin`, `Leonexis maims you`
+    ###
+
+    @termsByGender:
+        he: ['it', 'he', 'she', 'zhe', 'you']
+        his: ['its', 'his', 'her', 'zher', 'your']
+        him: ['it', 'him', 'her', 'zher', 'you']
+        himself: ['itself', 'himself', 'herself', 'zherself', 'yourself']
+        hisself: ['itself', 'hisself', 'herself', 'zherself', 'yourself']
+
+    constructor: ({@message, @type, @observer, @subject, @target}) ->
+        @tokens = @parse @message
+        @_tokensCache = @message
+
+    token: (token) ->
+        isFirstCap = token[0] isnt token[0].toLowerCase()
+        token = token.toLowerCase()
+
+        switch token
+            when 'is'
+                return 'are' if @lastObserver
+                return 'is'
+            when 'has'
+                return 'have' if @lastObserver
+                return 'has'
+            when 's', 'es'
+                return '' if @lastObserver
+                return token
+
+        subject = @subject
+        isObserver = @observer is @subject
+        if token[0] is '^'
+            token = token[1..]
+            subject = @target
+            isObserver = @observer is @target
+
+        if not subject?
+            return '???'
+
+        @lastObserver = isObserver
+        terms = Message.termsByGender[token]
+        term = null
+        if terms?
+            term = terms[subject.gender % 4]
+            term = terms[4] if isObserver
+        else
+            if isObserver
+                term = switch token
+                    when 'name' then 'you'
+                    when 'nameself' then 'yourself'
+                    when "name's" then 'your'
+                    when 'is' then 'are'
+            else
+                term = switch token
+                    when 'name' then subject.get 'name'
+                    when 'nameself' then subject.get 'name'
+                    when "name's" then "#{subject.get 'name'}'s"
+
+
+        if isFirstCap and term.length >= 1
+            term = term[0].toUpperCase() + term[1..]
+
+        term
+
+    parse: (msg) ->
+        tokens = []
+        while msg.length > 0
+            n = msg.indexOf '{'
+            token = '{'
+            if n is -1
+                tokens.push msg
+                return tokens
+
+            if n > 0
+                tokens.push msg[...n]
+
+            msg = msg[n+1..]
+            n = msg.indexOf '}'
+            if n is -1
+                tokens[tokens.length-1] = tokens[tokens.length-1] + token + msg
+                return tokens
+
+            tokens.push
+                token: token
+                data: msg[...n]
+
+            if n+1 >= msg.length
+                msg = ''
+                continue
+
+            msg = msg[n+1..]
+
+        tokens
+
+    forObserver: (observer) ->
+        oldObserver = @observer
+        @observer = observer
+        if @_tokenCache isnt @message
+            @tokens = @parse @message
+            @_tokensCache = @message
+
+        out = ""
+        for token in @tokens
+            if token.token?
+                out += @token token.data
+            else
+                out += token
+
+        @observer = oldObserver
+        out
+
+    toString: -> @forObserver @observer
+
+exports.Message = Message
