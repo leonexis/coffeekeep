@@ -7,13 +7,13 @@ new Command
         {mob, world} = context
         {verb, args} = request
         crypto = require 'crypto'
-        
+
         currentver = 1
-        
+
         if args.length < 2
             mob.print "\r\nPlease read the genhash help information before using.\r\n"
             return
-        
+
         hashtype = args[0]
         password = args[1]
         salt = ""
@@ -22,13 +22,13 @@ new Command
 
         tohash = salt + password
         outtext = hashtype + ":" + currentver + ":" + salt + ":"
-        
+
         try
             hashedpass = crypto.createHash(hashtype).update(tohash).digest('hex')
         catch error
             mob.print "\r\nInvalid hashing! #{error}\r\n"
             return
-            
+
         outtext += hashedpass
-        
+
         mob.print "\r\n#{outtext}\r\n"

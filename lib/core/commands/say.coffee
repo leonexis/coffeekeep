@@ -7,10 +7,10 @@ new Command
         util = require 'util'
         {mob, room} = context
         {verb, args} = request
-        
+
         message = args.join(" ")
         speaker = mob.get 'name'
-        
+
         switch verb
             when 'yell'
                 message = message.toUpperCase()
@@ -20,6 +20,6 @@ new Command
                 verb += "s, '"
             else
                 verb += "s, '"
-                
+
         for othermob in room.getMobs()
             othermob.print "%g#{speaker} #{verb}#{message}'%."

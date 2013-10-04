@@ -14,30 +14,29 @@ block headers
                 screenKeys: false,
                 convertEol: true
               });
-        
+
               term.on('data', function(data) {
                 socket.emit('data', data);
               });
-        
+
               term.on('title', function(title) {
                 document.title = title;
               });
-        
+
               term.open(document.body);
-        
+
               term.write('\x1b[31mWelcome to term.js!\x1b[m\r\n');
-        
+
               socket.on('data', function(data) {
                 term.write(data);
               });
-        
+
               socket.on('disconnect', function() {
                 term.destroy();
               });
             });
           };
         }).call(this);
-    
+
 block content
     h1= 'Mud Client'
-    

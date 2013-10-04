@@ -12,24 +12,24 @@ new Command
         {verb, args} = request
         if args.length < 1
             mob.print "You must specify a file"
-        
+
         currentArea = null
-        
+
         rom = new ROMReader()
-        
+
         rom.on 'area', (data) ->
             currentArea = new Area data
             world.areas.add currentArea
             mob.print "Creating area %c#{currentArea.id}%."
-        
+
         rom.on 'room', (data) ->
             room = new Room data
             mob.print "Adding room %c#{room.id}%. '%C#{room.get 'title'}%.'"
             console.log "Adding room #{room.id} '#{room.get 'title'}'"
             currentArea.rooms.add room
-        
+
         rom.on 'done', ->
             mob.print "Done."
-        
+
         rom.read args[0]
-    
+

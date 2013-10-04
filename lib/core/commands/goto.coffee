@@ -7,7 +7,7 @@ new Command
         {verb, args} = request
         if args.length < 1
             mob.print "You must specify a room id."
-        
+
         roomId = args[0]
         if '#' in roomId
             [areaId, roomId] = roomId.split '#'
@@ -25,7 +25,7 @@ new Command
             if not newRoom?
                 mob.print "That room doesn't exist."
                 return
-        
+
         mob.setLocation newRoom
         mob.doCommand 'look'
-        
+

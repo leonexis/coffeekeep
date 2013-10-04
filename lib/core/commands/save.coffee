@@ -8,7 +8,7 @@ new Command
         if args.length < 1
             mob.print "Which resource?"
             return do callback
-                
+
         switch args[0]
             when 'area'
                 mob.print "Saving area..."

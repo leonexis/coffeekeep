@@ -3,13 +3,13 @@
 exports.Room = class Room extends Model
     getArea: ->
         @collection.parent
-        
+
     getLocationId: ->
         "#{@getArea().id}##{@id}"
-        
+
     toString: ->
         "[room #{@getLocationId()}]"
-    
+
     getMobs: ->
         mobs = []
         here = @getLocationId()

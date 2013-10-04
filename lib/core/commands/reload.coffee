@@ -9,7 +9,7 @@ new Command
         if args.length < 1
             mob.print "What do you want to reload?"
             return
-        
+
         switch args[0].toLowerCase()
             when 'commands'
                 world.commands.forEach (command) ->

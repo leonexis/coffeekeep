@@ -22,7 +22,7 @@ app.get '/world', (req, res) ->
     world = app.get 'coffeekeep world'
     area = world.areas.first()
     res.render 'world', world: world
-    
+
 app.get '/world/:areaid', (req, res) ->
     world = app.get 'coffeekeep world'
     area = world.areas.get req.params.areaid

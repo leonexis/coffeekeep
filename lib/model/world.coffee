@@ -8,16 +8,16 @@ async = require 'async'
 
 exports.World = class World extends Model
     url: '/world'
-    
+
     initialize: ->
         @areas = new AreaCollection @
         @commands = new CommandCollection @
         @users = new UserCollection @
         @world = @
-    
+
     startup: (cb) ->
         @loadCollections cb
-    
+
     loadCollections: (callback) ->
         @commands.loadDirectory __dirname + '/../core/commands'
         async.parallel [
@@ -42,7 +42,7 @@ exports.World = class World extends Model
                 console.log "There are no areas loaded. Let me make one for you."
                 return @createStarterArea callback
             do callback
-    
+
     createStarterArea: (callback) ->
         async.waterfall [
             (cb) =>
@@ -50,33 +50,33 @@ exports.World = class World extends Model
                 area = new Area
                     id: "default"
                     title: "Default Area"
-                    
+
                 @areas.create area,
                     success: (area) ->
                         cb null, area
                     error: (err) ->
                         cb err
-            
+
             (area, cb) =>
                 console.log "Creating a new room"
                 room = new Room
                     id: "start"
                     title: "A new room"
                     description: "The is a new room for your new mud."
-                
+
                 area.rooms.create room,
                     success: (room) ->
                         cb null, room
                     error: (err) ->
                         cb err
-            
+
             (room, cb) =>
                 console.log "Setting new room as the world start location"
                 @world.set 'startLocation', do room.getLocationId
                 cb null
         ], (err) ->
             callback err
-    
+
     getStartRoom: ->
         loc = @world.get 'startLocation'
         if loc?
@@ -86,9 +86,9 @@ exports.World = class World extends Model
                 room = areas.rooms.get roomId
                 if room?
                     return room
-        
+
         console.error "Could not load the start location, trying first room of first area."
-        
+
         area = @areas.first()
         if not area?
             throw new Error "Could not find any areas in the world"

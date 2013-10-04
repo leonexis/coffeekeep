@@ -1,7 +1,7 @@
 new Command
     name: 'go'
     aliases: [
-        'north', 'east', 'south', 'west', 'up', 'down', 'northwest', 
+        'north', 'east', 'south', 'west', 'up', 'down', 'northwest',
         'northeast', 'southeast', 'southwest', 'n', 'e', 's', 'w', 'u', 'd',
         'nw', 'ne', 'se', 'sw', 'in', 'out', 'vortex', 'enter', 'leave']
     description: "Moves in the specified direction"
@@ -13,9 +13,9 @@ new Command
             if args.length < 1
                 mob.print "Go where?"
                 return
-                
+
             verb = args[0].toLowerCase()
-            
+
         direction = switch verb
             when 'north', 'n' then 'north'
             when 'east', 'e' then 'east'
@@ -31,16 +31,16 @@ new Command
             when 'leave', 'out' then 'leave'
             when 'vortex' then 'vortex'
             else null
-        
+
         if not direction?
             mob.print "That isn't a valid direction."
             return
-        
+
         link = room.get('links')[direction]
         if not link?
             mob.print "You can't go that way."
             return
-        
+
         if '#' in link.room
             [areaId, roomId] = link.room.split '#'
             newArea = world.areas.get 'areaId'
@@ -62,7 +62,6 @@ new Command
  #{room.getLocationId()}->#{direction}: #{link.room}"
                 mob.print "A dark energy prevents you from going that way."
                 return
-        
+
         mob.setLocation newRoom
         mob.doCommand 'look'
-        

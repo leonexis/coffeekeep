@@ -6,7 +6,7 @@ new Command
     action: (context, request, callback) ->
         {mob, room, session} = context
         {verb, args} = request
-        
+
         session.setEcho 'secret'
         session.question "Old password: ", (response) ->
             if not mob.checkPassword response
@@ -19,13 +19,13 @@ new Command
                         mob.print "Empty passwords are not allowed. Please try again."
                         session.setEcho 'normal'
                         return do callback
-                        
+
                     session.question "New Password (Again): ", (response2) ->
                         if not response2
                             mob.print "The second password was empty. Please try again."
                             session.setEcho 'normal'
                             return do callback
-                            
+
                         if not (response == response2)
                             mob.print "Passwords did not match."
                             session.setEcho 'normal'
@@ -35,4 +35,3 @@ new Command
                             mob.print "Password was changed successfully."
                             session.setEcho 'normal'
                             return do callback
-                    

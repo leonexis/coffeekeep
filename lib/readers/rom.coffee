@@ -3,9 +3,9 @@ fs = require 'fs'
 
 exports.ROMReader = class ROMReader extends readers.AreaReader
     debug: false
-    
+
     ROM_DIRECTIONS: ['north', 'east', 'south', 'west', 'up', 'down']
-    
+
     getString: ->
         # Get string up to ~
         data = @getLine()
@@ -14,7 +14,7 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
         data = data.split('~')[0]
         console.log "Got string #{data}" if @debug
         data
-    
+
     getLine: ->
         [@line, @lines...] = @lines
         @lineIndex += 1
@@ -22,14 +22,14 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
         if not @line?
             throw new Error "End of file"
         @line
-        
+
     getList: ->
         @getLine().split(' ')
-    
+
     strToList: (text) ->
         `text = text.replace(/\s{2,}/g, ' ')`
         text.split ' '
-    
+
     read: (filename) ->
         data = fs.readFileSync filename, encoding: 'ascii'
         state = null
@@ -43,10 +43,10 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
             if not @line or @line.indexOf("#") != 0
                 # Eat everything up until the next section
                 continue
-            
+
             console.log "Found marker #{@line}" if @debug
             index = Number @line[1..]
-            
+
             if not index? or Number.isNaN index
                 state = @line[1..].toLowerCase()
                 console.log "Marker is a new section #{state} (#{@line})" if @debug
@@ -58,22 +58,22 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
                 if index == 0
                     console.log "End of section found, skipping" if @debug
                     continue
-            
+
             switch state
                 when 'area'
                     current = {}
                     current.id = @getString()
                     current.description = @getString()
-                    
+
                     title = @getString()
                     if title? and title.indexOf '{' is 0 and title.indexOf '}' > 0
                         [levels, title] = title.split('}')
                         levels = levels[1..].trim()
                         [current.minLevel, current.maxLevel] = @strToList levels
                     current.title = title
-                    
+
                     @getList() # Lower and upper bounds of index, not needed
-                
+
                 when 'rooms'
                     current = {}
                     current.id = do index.toString
@@ -97,18 +97,18 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
                                 extra.keywords = @getString()
                                 extra.description = @getString()
                                 current.extras.push(extra)
-                            
-                        
-            
+
+
+
             if state? and current?
                 emitState = switch state
                     when 'rooms' then 'room'
                     else state
                 console.log "Emitting #{emitState}, #{JSON.stringify current}" if @debug
                 @emit emitState, current
-                
+
             current = null
-        
+
         @emit 'done'
 
 exports.ROMReader = ROMReader

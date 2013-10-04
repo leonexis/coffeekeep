@@ -13,19 +13,19 @@ class AreaReader extends events.EventEmitter
         console.log "AreaReader: #{JSON.stringify areaFile}"
         if not areaFile?
             return
-            
+
         area =
             id: areaFile.id
             title: areaFile.title
             description: areaFile.description
-        
+
         @emit 'area', area
-        
+
         if areaFile.rooms?
             for id, room of areaFile.rooms
                 room.id = id
                 @emit 'room', room
-        
+
         @emit 'done'
 
 exports.AreaReader = AreaReader

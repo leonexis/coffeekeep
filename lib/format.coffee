@@ -59,7 +59,7 @@ exports.defaultTheme = defaultTheme =
     mob: fg 'magenta'
     item: fg 'yellow'
     system: fg 'magenta'
-    
+
 # All format codes preceded by %.
 exports.FORMAT_CODES = FORMAT_CODES =
     '%': '%'
@@ -97,7 +97,7 @@ exports.FORMAT_CODES = FORMAT_CODES =
     'D': themed 'unexploredDoor'
     'S': themed 'system'
     'm': themed 'mob'
-    
+
 exports.format = format = (text, theme, color=true) ->
     theme ?= defaultTheme
     out = ""
@@ -120,7 +120,7 @@ exports.format = format = (text, theme, color=true) ->
     out
 
 exports.unformat = unformat = (text) ->
-    ### 
+    ###
     Converts a string with command codes in to a raw string without them
     ###
     text.replace /\x1b\[[\d:;]+[a-zA-Z]/g, ''

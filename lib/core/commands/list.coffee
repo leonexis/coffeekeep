@@ -10,9 +10,9 @@ new Command
             if args.length < 1
                 mob.print "Which resource?"
                 return
-                
+
             verb = args[0].toLowerCase()
-        
+
         switch verb
             when 'areas'
                 world.areas.forEach (area) ->

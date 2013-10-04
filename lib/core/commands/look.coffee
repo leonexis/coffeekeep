@@ -7,9 +7,9 @@ new Command
         util = require 'util'
         {mob, room} = context
         {verb, args} = request
-        
+
         noun = args[0] ? 'room'
-        
+
         switch noun
             when 'room'
                 mob.print "%T#{room.get 'title'}%."
@@ -18,10 +18,10 @@ new Command
                 for direction, link of room.get 'links'
                     exits += "%o#{direction}%. "
                 mob.print exits
-                
+
                 for othermob in room.getMobs()
                     mob.print "    %m#{othermob.getDisplayText context}%."
-            
+
             when 'self'
                 console.log JSON.stringify util
                 mob.write util.inspect mob.attributes
