@@ -114,7 +114,7 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
 
         if not commandModel?
             context.mob.print "I don't know how to #{verb}."
-            return
+            return callback? null, false
 
         commandModel.doCommand context, commandStr, callback
 
