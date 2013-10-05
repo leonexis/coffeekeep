@@ -8,6 +8,9 @@ async = require 'async'
 
 exports.World = class World extends Model
     url: '/world'
+    defaults:
+        startLocation: "default#start"
+        title: "CoffeeKeep"
 
     initialize: ->
         @areas = new AreaCollection @
