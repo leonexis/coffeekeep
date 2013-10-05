@@ -26,3 +26,6 @@ new Command
                 console.log JSON.stringify util
                 mob.write util.inspect mob.attributes
                 mob.print ''
+                
+            else
+                mob.print 'Sorry, you can only currently look at the room or yourself. Perhaps buy better glasses?'
