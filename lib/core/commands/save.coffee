@@ -21,6 +21,17 @@ new Command
                         mob.print "An error occured, see console."
                         console.log "Error during save: #{err}"
                         callback err
+            when 'world'
+                mob.print "Saving world config..."
+                world.save null,
+                    recursive: false
+                    success: ->
+                        mob.print "World config saved."
+                        do callback
+                    error: (err) ->
+                        mob.print "An error occured, see console."
+                        console.log "Error during save: #{err}"
+                        callback err
             else
                 mob.print "Invalid resource."
                 return do callback

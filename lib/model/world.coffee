@@ -81,9 +81,9 @@ exports.World = class World extends Model
         loc = @world.get 'startLocation'
         if loc?
             [areaId, roomId] = loc.split "#"
-            area = @areas.get area
+            area = @areas.get areaId
             if area?
-                room = areas.rooms.get roomId
+                room = area.rooms.get roomId
                 if room?
                     return room
 
