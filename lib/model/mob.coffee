@@ -105,7 +105,7 @@ exports.Mob = class Mob extends Model
             area: do room.getArea
 
         @world.commands.doCommand context, commandStr, callback
-
+    
 exports.MobCollection = class MobCollection extends Collection
     model: Mob
     urlPart: 'mobs'
