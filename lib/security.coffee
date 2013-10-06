@@ -175,6 +175,8 @@ class Mask extends MaskFactory
         return true if '*' in perms
         false
 
+    toString: -> "[Mask '#{@acl}']"
+
 
 ###
 Implements basic functionality for adapting an object to resolver for security
@@ -205,9 +207,17 @@ class AttributeResolver
     notEqual: (k, v) -> not @equal k, v
     isTrue: (k) -> not not @get k
 
-    hasPermission: (mask, permission) -> mask.hasPermission @, permission
+    hasPermission: (mask, permission) ->
+        if _.isString mask
+            mask = new Mask mask
+        mask.hasPermission @, permission
 
+class InsufficientPermissionsError extends Error
+    constructor: ({@mob, @mask, @permission}) ->
+
+    toString: -> "#{@mob} fails permission '#{@permission}' with mask #{@mask}"
 
 exports.MaskFactory = MaskFactory
 exports.Mask = Mask
 exports.AttributeResolver = AttributeResolver
+exports.InsufficientPermissionsError = InsufficientPermissionsError

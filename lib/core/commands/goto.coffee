@@ -1,5 +1,6 @@
 new Command
     name: 'goto'
+    acl: '-all +sysop'
     description: "Teleports the player to the specified location"
     help: "Usage: goto <room id>"
     action: (context, request) ->

@@ -1,5 +1,6 @@
 should = require 'should'
 security = require '../lib/security'
+{Mob} = require '../lib/model/mob'
 
 describe 'security', ->
     describe 'AttributeResolver', ->
@@ -187,6 +188,33 @@ describe 'security', ->
             mask.hasPermission(ar, 'anything').should.be.true
 
     describe 'Mob#hasPermission', ->
-        it 'should match on basic attributes'
-        it 'should match on gender string'
+        mob = null
+
+        beforeEach ->
+            mob = new Mob
+                name: 'foo'
+                gender: Mob.gender.male
+                level: 5
+
+        it 'should match on basic attributes', ->
+            mob.hasPermission('+all').should.be.true
+            mob.hasPermission('-all +level>=5').should.be.true
+            mob.hasPermission('-all +level>=5:one +level>=10:two', 'one')
+                .should.be.true
+            mob.hasPermission('-all +level>=5:one +level>=10:two', 'two')
+                .should.be.false
+            mob.set 'level', 10
+            mob.hasPermission('-all +level>=5:one +level>=10:two', 'one')
+                .should.be.true
+            mob.hasPermission('-all +level>=5:one +level>=10:two', 'two')
+                .should.be.true
+
+        it 'should match on gender string', ->
+            mob.hasPermission('-all +gender=male').should.be.true
+            mob.hasPermission('-all +gender=transman').should.be.false
+            mob.hasPermission('-all +gender=female').should.be.false
+            mob.set 'gender', Mob.gender.transman
+            mob.hasPermission('-all +gender=transman').should.be.true
+            mob.hasPermission('-all +gender=male').should.be.true
+
 

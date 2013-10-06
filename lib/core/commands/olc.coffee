@@ -1,5 +1,6 @@
 new Command
     name: 'olc'
+    acl: '-all +sysop'
     aliases: []
     description: "OnLine Creator"
     help: "Usage: olc room edit [title|description]"

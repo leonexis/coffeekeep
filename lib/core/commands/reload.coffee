@@ -1,5 +1,6 @@
 new Command
     name: 'reload'
+    acl: '-all +sysop'
     aliases: []
     description: "Reloads specified resource"
     help: "Usage: reload commands"

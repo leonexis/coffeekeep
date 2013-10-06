@@ -30,8 +30,8 @@ exports.MudSession = class MudSession extends EventEmitter
             return if @inputMode isnt 'normal'
             try
                 if line? and line
-                    @processCommand line, (err) =>
-                        if err?
+                    @processCommand line, (error) =>
+                        if error?
                             @write "Error while processing command '#{line}': #{error.toString()}"
                             console.error "Error while processing command: #{error.stack}"
                             do @updatePrompt
@@ -129,8 +129,11 @@ exports.MudSession = class MudSession extends EventEmitter
                     return
 
     readlineCompleter: (line, callback) ->
+        context =
+            session: @
+
         switch @inputMode
-            when 'command' then @world.commands.readlineCompleter line, callback
+            when 'normal' then @user.readlineCompleter context, line, callback
             else [[], line]
 
     updatePrompt: ->

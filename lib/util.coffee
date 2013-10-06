@@ -29,3 +29,11 @@ exports.splitFull = (text, sep, maxsplit=-1) ->
 
     out.push parts
     out
+
+# Simple and fast string hashing for caching acl and other results
+exports.hash = (str, hash=0) ->
+    return hash if str.length is 0
+    for i in [0...str.length]
+        hash = ((hash<<5)-hash)+str.charCodeAt i
+        hash = hash & hash
+    hash

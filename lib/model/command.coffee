@@ -1,13 +1,17 @@
 fs = require 'fs'
 path = require 'path'
+util = require 'util'
 coffee = require 'coffee-script'
 {splitFull} = require '../util'
 {Model, Collection} = require './'
+security = require '../security'
+
 
 exports.Command = class Command extends Model
     idAttribute: 'name'
     defaults:
         name: 'lazy'                    # Primary command name
+        acl: '+all'                     # By default, anyone can see
         aliases: []                     # Other command names
         prefixChar: null                # Get anything starting with char
         description: "I don't really do anything"
@@ -26,12 +30,27 @@ exports.Command = class Command extends Model
             verb: verb
             args: args
             line: commandStr
+
+        # Check to make sure we are able to run the command
+        if context.mob?
+            context.mob.mustHavePermission @getMask()
+
         action = @get('action')
         if action.length < 3
-            action context, request
-            do callback
+            try
+                result = action context, request
+            catch error
+                return callback error
+            callback null, result
         else
             action context, request, callback
+
+    getMask: ->
+        acl = @get 'acl'
+        if @_maskCache isnt acl
+            @mask = new security.Mask acl
+            @_maskCache = acl
+        @mask
 
 exports.CommandCollection = class CommandCollection extends Collection
     loadDirectory: (dirName, cb) ->
@@ -99,6 +118,12 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
 
     doCommand: (context, commandStr, callback) ->
         [verb, args...] = splitFull commandStr
+
+        # Check if it is a valid verb.
+        if verb not in @maskCheckVerbs context.mob
+            context.mob.print "I don't know how to #{verb}."
+            return callback? null, false
+
         commandModel = @get verb
         if not commandModel?
             models = @filter (c) ->
@@ -122,18 +147,39 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
         console.log "Updating valid commands"
         commands = @pluck 'name'
         aliases = []
-        @forEach (command) ->
+        @commandMasks = {}
+        @forEach (command) =>
+            name = command.get 'name'
+            mask = command.getMask()
+            @commandMasks[name] = mask
             commandAliases = command.get 'aliases'
             if commandAliases
-                aliases = aliases.concat command.get 'aliases'
+                for alias in commandAliases
+                    @commandMasks[alias] = mask
+                aliases = aliases.concat commandAliases
 
         @validCommands = commands.sort()
         @validAliases = aliases.sort()
         @validVerbs = commands.concat(aliases).sort()
 
-    readlineCompleter: (line, callback) ->
+    maskCheckVerbs: (mob) ->
+        verbs = []
+        seen = {}
+        for verb, mask of @commandMasks
+            cache = seen[mask.acl]
+            if cache?
+                verbs.push verb if cache
+                continue
+            result = mob.hasPermission mask
+            seen[mask.acl] = result
+            verbs.push verb if result
+
+        verbs.sort()
+
+    readlineCompleter: (context, line, callback) ->
         # TODO: chain completer to command
-        completions = @validVerbs
+        #completions = @validVerbs
+        completions = @maskCheckVerbs context.mob
         hits = completions.filter (c) ->
             c.indexOf(line) is 0
 

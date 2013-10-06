@@ -2,6 +2,7 @@ _ = require 'underscore'
 
 new Command
     name: 'config'
+    acl: '-all +sysop'
     description: "Configure the specified resource"
     help: "Usage: config [self|world|area] [list|get|set|delete] <key> <data>"
     action: (context, request, callback) ->

@@ -1,9 +1,12 @@
 _ = require 'underscore'
 {Model, Collection} = require './'
 {format} = require '../format'
+security = require '../security'
 
-exports.Mob = class Mob extends Model
-    @gender:    # Appearance/portraial. NOTE: these numbers are used for formatting
+
+class Mob extends Model
+    @gender:            # Appearance/portraial
+                        # NOTE: these numbers are used for formatting
         genderless: 0   # No gender traits possbible
         male: 1         # Treated like biological male, even if not open trans
         female: 2       # Treated like biological female, even if non open trans
@@ -13,7 +16,7 @@ exports.Mob = class Mob extends Model
         transwoman: 6   # Openly transgender woman. Uses female pronouns, but profile shows transwoman
         # Can have alternate gender that uses androgynous as #7
 
-    @sex:       # Sexual mechanic
+    @sex:               # Sexual mechanic
         none: 0         # No sexual mechanic
         male: 1         # Male sexual mechanic
         female: 2       # Female sexual mechanic
@@ -35,6 +38,15 @@ exports.Mob = class Mob extends Model
 
     initialize: ->
         @sessions = []
+        @resolver = new MobAttributeResolver @
+
+    hasPermission: (acl, permission) -> @resolver.hasPermission acl, permission
+    mustHavePermission: (acl, permission) ->
+        if not @hasPermission acl, permission
+            throw new security.InsufficientPermissionsError
+                mob: @
+                permission: permission ? ''
+                mask: acl
 
     toString: -> "[mob #{@id}]"
 
@@ -97,15 +109,42 @@ exports.Mob = class Mob extends Model
             context = {}
 
         callback ?= ->
+        context = @getContext context
+
+        @world.commands.doCommand context, commandStr, callback
+
+    getContext: (context) ->
         room = @getLocation()
         _.defaults context,
             mob: @
             room: room
             world: @world
-            area: do room.getArea
+            area: room.getArea()
 
-        @world.commands.doCommand context, commandStr, callback
-    
-exports.MobCollection = class MobCollection extends Collection
+    readlineCompleter: (context, line, callback) ->
+        context = @getContext context
+        @world.commands.readlineCompleter context, line, callback
+
+class MobCollection extends Collection
     model: Mob
     urlPart: 'mobs'
+
+class MobAttributeResolver extends security.AttributeResolver
+    constructor: (@mob) ->
+    get: (k) -> @mob.get k
+    equal: (k, v) ->
+        switch k
+            when 'gender'
+                return super k, v if not _(Mob.gender).has v
+                n = Mob.gender[v]
+                # Return true if direct match
+                return true if n is @get k
+                # Return true if mob's base gender matches
+                return true if n < 4 and n is @get(k) % 4
+                return false
+            else
+                return super k, v
+
+exports.Mob = Mob
+exports.MobCollection = MobCollection
+exports.MobAttributeResolver = MobAttributeResolver

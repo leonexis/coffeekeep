@@ -1,5 +1,6 @@
 new Command
     name: 'save'
+    acl: '-all +sysop'
     description: "Lists the specified resource"
     help: "Usage: save [area]"
     action: (context, request, callback) ->

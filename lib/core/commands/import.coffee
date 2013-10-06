@@ -5,6 +5,7 @@
 
 new Command
     name: 'import'
+    acl: '-all +sysop'
     description: "Imports an area from a file."
     help: "Usage: import <file>"
     action: (context, request) ->

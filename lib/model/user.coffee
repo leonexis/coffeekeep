@@ -4,7 +4,7 @@ exports.User = class User extends Mob
     defaults:
         age: 0                      # Player age in days
         wasAtLocation: null         # Player location before last disconnect
-        passwordHash: null          # Salted and encrypted password hash
+        sysop: true                 # Have complete admin access
 
     idAttribute: 'name'
 
