@@ -4,7 +4,7 @@ exports.User = class User extends Mob
     defaults:
         age: 0                      # Player age in days
         wasAtLocation: null         # Player location before last disconnect
-        sysop: true                 # Have complete admin access
+        sysop: false                # Have complete admin access
 
     idAttribute: 'name'
 
@@ -54,3 +54,17 @@ exports.User = class User extends Mob
 exports.UserCollection = class UserCollection extends MobCollection
     model: User
     urlPart: 'users'
+
+    create: (attributes, options) ->
+        # Check to see if this is the first user created. If so, make it the
+        # sysop
+        if @length is 0
+            if attributes instanceof User
+                console.log "We have our first user! Making #{attributes.get 'name'} a sysop"
+                attributes.set 'sysop', true
+            else
+                console.log "We have our first user! Making #{attributes.name} a sysop"
+                attributes.sysop = true
+            # TODO: notify the user somehow?
+
+        super attributes, options
