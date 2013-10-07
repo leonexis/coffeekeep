@@ -133,7 +133,10 @@ exports.MudSession = class MudSession extends EventEmitter
             session: @
 
         switch @inputMode
-            when 'normal' then @user.readlineCompleter context, line, callback
+            when 'normal' then @user.readlineCompleter context, line, (err, data) =>
+                if err?
+                    console.log "error in readlineCompleter: #{err.stack}"
+                callback err, data
             else [[], line]
 
     updatePrompt: ->

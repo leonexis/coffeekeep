@@ -1,4 +1,5 @@
 _ = require 'underscore'
+util = require 'util'
 {Model, Collection} = require './'
 {format} = require '../format'
 security = require '../security'
@@ -124,6 +125,48 @@ class Mob extends Model
     readlineCompleter: (context, line, callback) ->
         context = @getContext context
         @world.commands.readlineCompleter context, line, callback
+
+    ###
+    Find unique and prefered target names based on the filter.
+    Collections could be:
+
+     - `mobs` - mobs in the current room
+     - `users` - users in game
+
+    TODO:
+
+     - `exits` - exits in the room
+     - `specials` - specials in the room (signs, etc)
+     - `items` - items in the room
+     - `inventory` - items in mob's inventory
+    ###
+    getTargets: (context, collections, filter) ->
+        context = @getContext context
+        collections ?= ['mobs']
+        if not _.isArray collections
+            collections = [collections]
+        models = []
+        for collection in collections
+            switch collection
+                when 'mobs'
+                    models = models.concat context.room.getMobs()
+                when 'users'
+                    models = models.concat context.world.users.models
+
+        targets = {}
+        seen = {}
+        for model in models
+            name = model.get 'name'
+            if not seen[model.name]?
+                seen[name] = 0
+                targets[name] = model
+            else
+                seen[name] += 1
+                targets["#{name}.#{seen[name]}"] = model
+
+        targets
+
+
 
 class MobCollection extends Collection
     model: Mob

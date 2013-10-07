@@ -1,6 +1,9 @@
 {Model, Collection} = require './'
 
 exports.Room = class Room extends Model
+    initialize: ->
+        # TODO: convert exits, specials, etc to collections
+
     getArea: ->
         @collection.parent
 

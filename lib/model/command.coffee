@@ -21,15 +21,13 @@ exports.Command = class Command extends Model
             {mob} = context
             mob.print "The lazy command does nothing."
 
+        completer: (context, request) ->
+            [[], request.line]
+
     toString: -> "[command #{@id}]"
 
     doCommand: (context, commandStr, callback) ->
-        [verb, args...] = splitFull commandStr
-        verb = verb.toLowerCase()
-        request =
-            verb: verb
-            args: args
-            line: commandStr
+        request = @parseCommand context, commandStr
 
         # Check to make sure we are able to run the command
         if context.mob?
@@ -44,6 +42,31 @@ exports.Command = class Command extends Model
             callback null, result
         else
             action context, request, callback
+
+    readlineCompleter: (context, commandStr, callback) ->
+        request = @parseCommand context, commandStr
+
+        if context.mob?
+            context.mob.mustHavePermission @getMask()
+
+        completer = @get('completer')
+        if completer.length < 3
+            try
+                result = completer context, request
+                console.log util.inspect result
+            catch error
+                return callback error
+            callback null, result
+        else
+            completer context, request, callback
+
+    parseCommand: (context, commandStr) ->
+        [verb, args...] = splitFull commandStr
+        verb = verb.toLowerCase()
+        request =
+            verb: verb
+            args: args,
+            line: commandStr
 
     getMask: ->
         acl = @get 'acl'
@@ -116,27 +139,30 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
             console.error error.stack
             return false
 
-    doCommand: (context, commandStr, callback) ->
-        [verb, args...] = splitFull commandStr
-
+    getCommand: (context, verb) ->
         # Check if it is a valid verb.
         if verb not in @maskCheckVerbs context.mob
-            context.mob.print "I don't know how to #{verb}."
-            return callback? null, false
+            return
 
         commandModel = @get verb
         if not commandModel?
             models = @filter (c) ->
                 aliases = c.get 'aliases'
                 if not aliases?
-                    return false
+                    return
 
                 verb in aliases
             if models.length > 1
                 console.error "WARNING: Multiple commands found for alias '#{verb}'"
 
-            commandModel = models[0]
+            return models[0]
 
+        commandModel
+
+    doCommand: (context, commandStr, callback) ->
+        [verb, args...] = splitFull commandStr
+
+        commandModel = @getCommand context, verb
         if not commandModel?
             context.mob.print "I don't know how to #{verb}."
             return callback? null, false
@@ -180,8 +206,16 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
         # TODO: chain completer to command
         #completions = @validVerbs
         completions = @maskCheckVerbs context.mob
-        hits = completions.filter (c) ->
-            c.indexOf(line) is 0
+
+        [verb, args...] = splitFull line
+        if verb? and args.length > 0
+            commandModel = @getCommand context, verb
+            if not commandModel?
+                return [[], line]
+            return commandModel.readlineCompleter context, line, callback
+        else
+            hits = completions.filter (c) ->
+                c.indexOf(line) is 0
 
         if line.length
             callback null, [hits, line]
