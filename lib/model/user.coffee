@@ -1,7 +1,8 @@
+_ = require 'underscore'
 {Mob, MobCollection} = require './mob'
 
 exports.User = class User extends Mob
-    defaults:
+    defaults: -> _.defaults Mob::defaults(),
         age: 0                      # Player age in days
         wasAtLocation: null         # Player location before last disconnect
         sysop: false                # Have complete admin access

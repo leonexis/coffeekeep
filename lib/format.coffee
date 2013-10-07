@@ -47,6 +47,8 @@ exports.defaultTheme = defaultTheme =
     normal: do reset
     roomTitle: bold fg 'cyan'
     roomDescription: do reset
+    roomExtra: bold fg 'cyan'
+    roomExtraSeen: fg 'cyan'
     direction: bold fg 'yellow'
     unexploredDirection: bold fg 'yellow'
     door: fg 'cyan'
@@ -92,6 +94,8 @@ exports.FORMAT_CODES = FORMAT_CODES =
     'h': themed 'weather'
     'T': themed 'roomTitle'
     'L': themed 'roomDescription'
+    'x': themed 'roomExtra'
+    'X': themed 'roomExtraSeen'
     'o': themed 'direction'
     'O': themed 'unexploredDirection'
     'd': themed 'door'

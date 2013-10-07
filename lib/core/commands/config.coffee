@@ -34,6 +34,7 @@ new Command
             when 'self' then mob
             when 'world' then world
             when 'area' then area
+            when 'room' then room
             else mob.getTargets(context)[target]
 
         if not targetObj?
@@ -55,15 +56,14 @@ new Command
             when 'list'
                 mob.print "#{target} list:"
                 seen = []
-                defaults = targetObj.defaults
+                defaults = _.result targetObj, 'defaults'
                 attrs = targetObj.attributes
-                if _.isObject defaults
-                    for k, v of defaults
-                        if attrs[k]? and attrs[k] isnt v
-                            mob.print " %c#{k}%.: #{JSON.stringify attrs[k]} %K(default: #{JSON.stringify v})%."
-                        else
-                            mob.print " %c#{k}%.: %K#{JSON.stringify v} (default)%."
-                        seen.push k
+                for k, v of defaults
+                    if attrs[k]? and attrs[k] isnt v
+                        mob.print " %c#{k}%.: #{JSON.stringify attrs[k]} %K(default: #{JSON.stringify v})%."
+                    else
+                        mob.print " %c#{k}%.: %K#{JSON.stringify v} (default)%."
+                    seen.push k
 
                 for k, v of attrs
                     continue if k in seen

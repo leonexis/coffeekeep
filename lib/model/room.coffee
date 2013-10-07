@@ -1,6 +1,10 @@
 {Model, Collection} = require './'
 
-exports.Room = class Room extends Model
+class Room extends Model
+    defaults: ->
+        links: []
+        extras: []
+
     initialize: ->
         # TODO: convert exits, specials, etc to collections
 
@@ -19,6 +23,9 @@ exports.Room = class Room extends Model
         mobs = @world.users.filter (mob) =>
             mob.get('currentLocation') is here
 
-exports.RoomCollection = class RoomCollection extends Collection
+class RoomCollection extends Collection
     model: Room
     urlPart: 'rooms'
+
+exports.Room = Room
+exports.RoomCollection = RoomCollection

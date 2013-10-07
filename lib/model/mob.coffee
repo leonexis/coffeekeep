@@ -23,17 +23,18 @@ class Mob extends Model
         female: 2       # Female sexual mechanic
         intersex: 3     # Both male and female mechanics
 
-    defaults:
+    defaults: ->
         name: 'unnamed'
         shortDescription: 'an unnamed mob'
         longDescription: 'A generic formless mob. So much, in fact, that
  looking at {him} hurts the eyes.'
         extraDescription: 'This would be a long extra description... if it were
  written, of course.'
-        gender: @gender.genderless      # Determines he/she/it/zhe
-        sex: @sex.none                  # Determines sexual mechanics
+        gender: Mob.gender.genderless      # Determines he/she/it/zhe
+        sex: Mob.sex.none                  # Determines sexual mechanics
         height: 150                     # Height in cm
         weight: 80                      # Weight in kg
+        tattoos: []                     # Invisible IDs assigned by other commands
 
         currentLocation: null
 
@@ -165,6 +166,22 @@ class Mob extends Model
                 targets["#{name}.#{seen[name]}"] = model
 
         targets
+
+    hasTattoo: (tattoo) ->
+        tattoos = @get 'tattoos'
+        tattoos ?= []
+        tattoo in tattoos
+
+    setTattoo: (tattoo) ->
+        tattoos = @get 'tattoos'
+        tattoos ?= []
+        tattoos.push tattoo
+        @set 'tattoos', _.uniq tattoos
+
+    unsetTattoo: (tattoo) ->
+        tattoos = @get 'tattoos'
+        tattoos ?= []
+        @set 'tattoos', _.without tattoos, tattoo
 
 
 
