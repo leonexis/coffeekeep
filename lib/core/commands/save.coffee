@@ -1,3 +1,4 @@
+async = require 'async'
 new Command
     name: 'save'
     acl: '-all +sysop'
@@ -22,6 +23,24 @@ new Command
                         mob.print "An error occured, see console."
                         console.log "Error during save: #{err}"
                         callback err
+            when 'areas'
+                mob.print "Saving all areas..."
+                callbacks = world.areas.map (area) -> (cb) ->
+                    area.save null,
+                        recursive: true
+                        success: ->
+                            mob.print "Area #{area.id} saved."
+                            cb null
+                        error: (err) ->
+                            mob.print "An error occured saving area #{area.id}."
+                            console.log "Error while saving #{area.id}: #{err}, #{err.stack}"
+                            cb err
+                async.parallel callbacks, (err) ->
+                    if (err)
+                        mob.print "An error occured while saving areas."
+                        return console.log "An error occured while saving areas: #{err.stack}"
+                    callback null
+                  
             when 'world'
                 mob.print "Saving world config..."
                 world.save null,
