@@ -90,7 +90,9 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
                                 direction = @ROM_DIRECTIONS[Number(subsec[1..])]
                                 link.description = @getString()
                                 link.keywords = @getString()
-                                [link.x_locks, link.x_key, link.room] = @getList()
+                                [isDoor, link.x_key, link.room] = @getList()
+                                # TODO support locks
+                                link.door = isDoor > 0
                                 current.links[direction] = link
                             when 'E'
                                 extra = {}

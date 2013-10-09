@@ -5,7 +5,7 @@ new Command
     help: "Usage: look [direction or object]"
     action: (context, request) ->
         util = require 'util'
-        {mob, room} = context
+        {mob, room, area} = context
         {verb, args} = request
 
         noun = args[0] ? 'room'
@@ -21,14 +21,25 @@ new Command
                     continue if not extra.keywords?
                     for keyword in extra.keywords.split ' '
                         re = new RegExp "(^|\\W)(#{keyword})(\\W|$)", "i"
-                        if mob.hasTattoo "look:extra:#{locId}:#{extra.keywords}"
+                        if mob.hasCookie "look_extra_#{locId}_#{extra.keywords}"
                             desc = desc.replace re, "$1%X$2%L$3"
                         else
                             desc = desc.replace re, "$1%x$2%L$3"
                 mob.print "%L#{desc}%."
                 exits = " exits: "
+                history = mob.getCookie("mob_location_history") ? []
                 for direction, link of room.get 'links'
-                    exits += "%o#{direction}%. "
+                    roomId = link.room
+                    if '#' not in roomId
+                        roomId = "#{area.id}##{roomId}"
+
+                    color = 'o'
+                    if link.door
+                        color = 'd'
+                    if roomId not in history
+                        color = color.toUpperCase()
+
+                    exits += "%#{color}#{direction}%. "
                 mob.print exits
 
                 for othermob in room.getMobs()
@@ -45,9 +56,9 @@ new Command
                 for extra in extras
                     continue if not extra.keywords?
                     for keyword in extra.keywords.split ' '
-                        if noun is keyword
+                        if noun is keyword.toLowerCase()
                             mob.print extra.description
-                            mob.setTattoo "look:extra:#{locId}:#{extra.keywords}"
+                            mob.setCookie "look_extra_#{locId}_#{extra.keywords}"
                             return
 
                 # TODO: directions

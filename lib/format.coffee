@@ -49,7 +49,7 @@ exports.defaultTheme = defaultTheme =
     roomDescription: do reset
     roomExtra: bold fg 'cyan'
     roomExtraSeen: fg 'cyan'
-    direction: bold fg 'yellow'
+    direction: fg 'yellow'
     unexploredDirection: bold fg 'yellow'
     door: fg 'cyan'
     unexploredDoor: bold fg 'cyan'

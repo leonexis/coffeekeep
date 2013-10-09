@@ -19,11 +19,24 @@ new Command
         rom = new ROMReader()
 
         rom.on 'area', (data) ->
+            currentArea = world.areas.get data.id
+            if currentArea?
+                currentArea.set data
+                mob.print "Reloading area %c#{currentArea.id}%."
+                return
+
             currentArea = new Area data
             world.areas.add currentArea
             mob.print "Creating area %c#{currentArea.id}%."
 
         rom.on 'room', (data) ->
+            room = currentArea.rooms.get(data.id)
+            if room?
+                room.set data
+                mob.print "Reloaded room %c#{room.id}%. '%C#{room.get 'title'}%.'"
+                console.log "Reloaded room #{room.id} '#{room.get 'title'}'"
+                return
+
             room = new Room data
             mob.print "Adding room %c#{room.id}%. '%C#{room.get 'title'}%.'"
             console.log "Adding room #{room.id} '#{room.get 'title'}'"
