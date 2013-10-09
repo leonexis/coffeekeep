@@ -5,7 +5,7 @@ new Command
     help: "Usage: look [direction or object]"
     action: (context, request) ->
         util = require 'util'
-        {mob, room, area} = context
+        {mob, room, area, world} = context
         {verb, args} = request
 
         noun = args[0] ? 'room'
@@ -31,13 +31,16 @@ new Command
                 for direction, link of room.get 'links'
                     roomId = link.room
                     if '#' not in roomId
-                        roomId = "#{area.id}##{roomId}"
+                        roomId = world.resolveLocationId roomId
 
                     color = 'o'
                     if link.door
                         color = 'd'
                     if roomId not in history
                         color = color.toUpperCase()
+
+                    if not roomId
+                        color = 'R'
 
                     exits += "%#{color}#{direction}%. "
                 mob.print exits

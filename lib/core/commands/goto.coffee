@@ -2,7 +2,7 @@ new Command
     name: 'goto'
     acl: '-all +sysop'
     description: "Teleports the player to the specified location"
-    help: "Usage: goto <room id>"
+    help: "Usage: goto (<room id>|<area id>)"
     action: (context, request) ->
         {mob, room, world, area} = context
         {verb, args} = request
@@ -22,7 +22,7 @@ new Command
                 mob.print "That room doesn't exist in that area."
                 return
         else
-            newRoom = area.rooms.get roomId
+            newRoom = world.getLocationById roomId, area
             if not newRoom?
                 mob.print "That room doesn't exist."
                 return

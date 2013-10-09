@@ -41,27 +41,12 @@ new Command
             mob.print "You can't go that way."
             return
 
-        if '#' in link.room
-            [areaId, roomId] = link.room.split '#'
-            newArea = world.areas.get 'areaId'
-            if not newArea?
-                console.error "Link to non-loaded area in
- #{room.getLocationId()}->#{direction}: #{link.room}"
-                mob.print "A dark energy prevents you from going that way."
-                return
-            newRoom = newArea.get roomId
-            if not newRoom?
-                console.error "Link to non-existant room in a different area.
- Out of date link? #{room.getLocationId()}->#{direction}: #{link.room}"
-                mob.print "A dark energy prevents you from going that way."
-                return
-        else
-            newRoom = area.rooms.get link.room
-            if not newRoom?
-                console.error "Link to room in same area does not exist.
- #{room.getLocationId()}->#{direction}: #{link.room}"
-                mob.print "A dark energy prevents you from going that way."
-                return
+        newRoom = world.getLocationById link.room, area
+        if not newRoom?
+            console.error "Link to room does not exist.
+#{room.getLocationId()}->#{direction}: #{link.room}"
+            mob.print "A dark energy prevents you from going that way."
+            return
 
         mob.setLocation newRoom
         mob.doCommand 'look'
