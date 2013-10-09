@@ -23,6 +23,8 @@ class Mob extends Model
         female: 2       # Female sexual mechanic
         intersex: 3     # Both male and female mechanics
 
+    @maxLocationHistory: 50 # Maximum number of rooms to keep in history cookie
+
     defaults: ->
         name: 'unnamed'
         shortDescription: 'an unnamed mob'
@@ -34,13 +36,23 @@ class Mob extends Model
         sex: Mob.sex.none                  # Determines sexual mechanics
         height: 150                     # Height in cm
         weight: 80                      # Weight in kg
-        tattoos: []                     # Invisible IDs assigned by other commands
+        tattoos: {}                     # Invisible IDs assigned by other commands
 
         currentLocation: null
 
     initialize: ->
         @sessions = []
+        @cookies = {}
         @resolver = new MobAttributeResolver @
+
+        # Keep track of the last fiew locations
+        @on 'change:currentLocation', (model, value, options) =>
+            return if model isnt @
+            history = @getCookie("mob_location_history") ? []
+            history.push value
+            while history.length > Mob.maxLocationHistory
+                history.shift()
+            @setCookie "mob_location_history", history
 
     hasPermission: (acl, permission) -> @resolver.hasPermission acl, permission
     mustHavePermission: (acl, permission) ->
@@ -167,21 +179,35 @@ class Mob extends Model
 
         targets
 
+    # Perminant saved tracking information (achievements, crimes, etc)
     hasTattoo: (tattoo) ->
         tattoos = @get 'tattoos'
-        tattoos ?= []
-        tattoo in tattoos
+        tattoos ?= {}
+        tattoos[tattoo] != undefined
 
-    setTattoo: (tattoo) ->
+    getTattoo: (tattoo) ->
         tattoos = @get 'tattoos'
-        tattoos ?= []
-        tattoos.push tattoo
-        @set 'tattoos', _.uniq tattoos
+        tattoos ?= {}
+        tattoos[tattoo]
+
+    setTattoo: (tattoo, value=true) ->
+        tattoos = @get 'tattoos'
+        tattoos ?= {}
+        tattoos[tattoo] = value
+        @set 'tattoos', tattoos
 
     unsetTattoo: (tattoo) ->
         tattoos = @get 'tattoos'
-        tattoos ?= []
-        @set 'tattoos', _.without tattoos, tattoo
+        tattoos ?= {}
+        if tattoos[tattoo] != undefined
+            delete tattoos[tattoo]
+        @set 'tattoos', tattoos
+
+    # Temporary tracking information (seen rooms, room extras, etc)
+    hasCookie: (cookie) -> @cookies[cookie] != undefined
+    getCookie: (cookie) -> @cookies[cookie]
+    setCookie: (cookie, value=true) -> @cookies[cookie] = value
+    unsetCookie: (cookie) -> delete @cookies[cookie] if @hasCookie cookie
 
 
 
