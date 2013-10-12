@@ -11,6 +11,12 @@ new Command
             mob.print "Which resource?"
             return do callback
 
+        printStatus = (status) =>
+            mob.print "\x1b[1A\x1b[2K#{status}"
+
+        updateProgress = (task, total, action) =>
+            printStatus "Area save: [#{task}/#{total}] #{action}"
+
         switch args[0]
             when 'area'
                 mob.print "Saving area..."
@@ -26,10 +32,12 @@ new Command
             when 'areas'
                 mob.print "Saving all areas..."
                 callbacks = world.areas.map (area) -> (cb) ->
+                    printStatus "Saving area #{area.id}"
                     area.save null,
                         recursive: true
                         success: ->
-                            mob.print "Area #{area.id} saved."
+                            printStatus "Area #{area.id} saved."
+                            mob.print ''
                             cb null
                         error: (err) ->
                             mob.print "An error occured saving area #{area.id}."
@@ -40,7 +48,7 @@ new Command
                         mob.print "An error occured while saving areas."
                         return console.log "An error occured while saving areas: #{err.stack}"
                     callback null
-                  
+
             when 'world'
                 mob.print "Saving world config..."
                 world.save null,

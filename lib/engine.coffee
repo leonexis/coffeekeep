@@ -189,8 +189,10 @@ exports.MudSession = class MudSession extends EventEmitter
 
 
 exports.MudService = class MudService extends EventEmitter
+
     constructor: (@world) ->
         @sessions = []
+        @running = false
 
     createSession: (socket) ->
         session = new MudSession @, socket

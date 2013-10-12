@@ -47,6 +47,7 @@ exports.World = class World extends Model
             do callback
 
     createStarterArea: (callback) ->
+        ###
         async.waterfall [
             (cb) =>
                 console.log "Creating a new area"
@@ -67,9 +68,14 @@ exports.World = class World extends Model
                     title: "A new room"
                     description: "The is a new room for your new mud."
 
-                area.rooms.create room,
+                area.vrooms.create room,
                     success: (room) ->
-                        cb null, room
+                        iroom = room.getClone()
+                        areas.rooms.add iroom
+                            success: (iroom) ->
+                                cb null, iroom
+                            error: (err) ->
+                                cb err
                     error: (err) ->
                         cb err
 
@@ -79,6 +85,22 @@ exports.World = class World extends Model
                 cb null
         ], (err) ->
             callback err
+        ###
+        console.log "Creating a new area"
+        area = new Area
+            id: "default"
+            title: "Default Area"
+        @areas.add area
+        vroom = new Room
+            id: "1"
+            title: "A new room"
+            description: "This is a new room for your new MUD."
+        area.vrooms.add vroom
+        room = vroom.cloneVirtual()
+        area.rooms.add room
+        console.log "Setting new room as the world start location"
+        @world.set 'startLocation', room.getLocationId()
+        callback null
 
     getStartRoom: ->
         loc = @world.get 'startLocation'

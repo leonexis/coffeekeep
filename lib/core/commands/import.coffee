@@ -15,35 +15,63 @@ new Command
             mob.print "You must specify a file"
 
         currentArea = null
+        currentSection = null
+        stats = 
+            room: 0
+            area: 0
+        
+        printStatus = (status) =>
+            mob.print "\x1b[1A\x1b[2K#{status}"
+        
+        updateProgress = (task, total, action) =>
+            printStatus "Area reset: [#{task}/#{total}] #{action}"
+        
+        resetArea = (area) ->
+            area.on 'progress:reset', updateProgress
+            area.reset()
+            area.off 'progress:reset', updateProgress
+            printStatus "Done importing area %c#{area.id}%."
+        
+        mob.print ''
 
         rom = new ROMReader()
 
         rom.on 'area', (data) ->
+            stats.area++
+            if currentArea?
+                console.log "Starting new area, resetting previous area."
+                resetArea currentArea
+                
             currentArea = world.areas.get data.id
             if currentArea?
                 currentArea.set data
-                mob.print "Reloading area %c#{currentArea.id}%."
+                printStatus "Reloading area %c#{currentArea.id}%."
+                mob.print ''
                 return
 
             currentArea = new Area data
             world.areas.add currentArea
-            mob.print "Creating area %c#{currentArea.id}%."
+            printStatus "Creating area %c#{currentArea.id}%."
+            mob.print ''
 
         rom.on 'room', (data) ->
-            room = currentArea.rooms.get(data.id)
+            stats.room++
+            room = currentArea.vrooms.get(data.id)
             if room?
                 room.set data
-                mob.print "Reloaded room %c#{room.id}%. '%C#{room.get 'title'}%.'"
-                console.log "Reloaded room #{room.id} '#{room.get 'title'}'"
+                printStatus "Reloaded vRoom %c#{room.id}%. '%C#{room.get 'title'}%.'"
+                #console.log "Reloaded vRoom #{room.id} '#{room.get 'title'}'"
                 return
 
             room = new Room data
-            mob.print "Adding room %c#{room.id}%. '%C#{room.get 'title'}%.'"
-            console.log "Adding room #{room.id} '#{room.get 'title'}'"
-            currentArea.rooms.add room
+            printStatus "Adding vRoom %c#{room.id}%. '%C#{room.get 'title'}%.'"
+            #console.log "Adding vRoom #{room.id} '#{room.get 'title'}'"
+            currentArea.vrooms.add room
 
         rom.on 'done', ->
-            mob.print "Done."
+            #console.log "Imported last area, resetting it"
+            resetArea currentArea
+            printStatus "Done importing #{stats.area} areas, #{stats.room} rooms"
 
         rom.read args[0]
 

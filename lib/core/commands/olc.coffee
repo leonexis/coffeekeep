@@ -21,6 +21,6 @@ new Command
             return do callback
 
         session.question "New text: ", (response) ->
-            room.set attr, response
+            room.virtual.set attr, response
             return do callback
 

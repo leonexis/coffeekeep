@@ -7,7 +7,7 @@ _ = require 'underscore'
 exports.enable = (options={}) ->
     _.defaults options,
         database: path.resolve "#{__dirname}/../../../coffeekeep.sqlite'"
-        verbose: true
+        #verbose: true
 
     {Model, Collection} = require '../../model'
     sqlite3 = require 'sqlite3' # Lazy load

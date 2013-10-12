@@ -35,6 +35,7 @@ new Command
             when 'world' then world
             when 'area' then area
             when 'room' then room
+            when 'vroom' then room.virtual
             else mob.getTargets(context)[target]
 
         if not targetObj?
@@ -54,7 +55,10 @@ new Command
                 targetObj.unset key
                 mob.print "#{target} #{key} unset."
             when 'list'
-                mob.print "#{target} list:"
+                title = "#{target} list: "
+                if targetObj.virtual?
+                    title += "%g(instance of virtual #{targetObj.virtual.toString()})%."
+                mob.print title
                 seen = []
                 defaults = _.result targetObj, 'defaults'
                 attrs = targetObj.attributes
@@ -64,7 +68,16 @@ new Command
                     else
                         mob.print " %c#{k}%.: %K#{JSON.stringify v} (default)%."
                     seen.push k
-
+                
+                if targetObj.virtual?
+                    for k, v of targetObj.virtual.attributes
+                        continue if k in seen
+                        seen.push k
+                        if attrs[k]? and attrs[k] isnt v
+                            mob.print " %c#{k}%.: #{JSON.stringify attrs[k]} %y(virtual: #{JSON.stringify v})%."
+                        else
+                            mob.print " %c#{k}%.: #{JSON.stringify v} %g(virtual)%."
+                
                 for k, v of attrs
                     continue if k in seen
                     mob.print " %c#{k}%.: #{JSON.stringify v}"
