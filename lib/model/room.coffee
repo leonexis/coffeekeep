@@ -1,5 +1,6 @@
 {Model, Collection} = require './'
 {MobCollection} = require './mob'
+{ItemCollection} = require './item'
 
 class Room extends Model
     savedCollections: ['mobs', 'items']
@@ -10,7 +11,8 @@ class Room extends Model
 
     initialize: ->
         # TODO: convert exits, specials, etc to collections
-        #@mobs = MobCollection @
+        @mobs = new MobCollection @
+        @items = new ItemCollection @
 
     getArea: ->
         @collection.parent

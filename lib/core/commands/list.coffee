@@ -18,8 +18,14 @@ new Command
                 world.areas.forEach (area) ->
                     mob.print "%c#{area.id}%. - %T#{area.get 'title'}%."
             when 'rooms'
-                area.rooms.forEach (room) ->
-                    mob.print "%c#{room.id}%. - %T#{room.get 'title'}%."
+                area.vrooms.forEach (vroom) ->
+                    mob.print "%c#{vroom.id}%. - %T#{vroom.get 'title'}%."
+            when 'mobs'
+                area.vmobs.forEach (vmob) ->
+                    mob.print "%c#{vmob.id}%. - %T#{vmob.get 'shortDescription'}%. (%c#{vmob.get 'name'}%.)"
+            when 'items'
+                area.vitems.forEach (vitem) ->
+                    mob.print "%c#{vitem.id}%. - %T#{vitem.get 'shortDescription'}%. (%c#{vitem.get 'name'}%.)"
             when 'commands'
                 world.commands.forEach (command) ->
                     mob.print "%c#{command.id}%. - %T#{command.get 'description'}%."

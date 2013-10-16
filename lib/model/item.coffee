@@ -2,13 +2,13 @@
 
 class Item extends Model
     defaults: ->
-        keywords: ""
+        name: ""
         shortDescription: ""
-        longDescription: ""
+        description: ""
         weight: 0
         cost: 0
         extras: []
-        effects: []
+        affects: []
 
     initialize: ->
 
