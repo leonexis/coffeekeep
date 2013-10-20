@@ -2,9 +2,10 @@ fs = require 'fs'
 path = require 'path'
 util = require 'util'
 coffee = require 'coffee-script'
-{splitFull} = require '../util'
-{Model, Collection} = require './'
-security = require '../security'
+_ = require 'underscore'
+{splitFull} = require '../coffeekeep.core/util'
+{Model, Collection} = require './base'
+security = require '../coffeekeep.core/security'
 
 
 exports.Command = class Command extends Model
@@ -76,11 +77,18 @@ exports.Command = class Command extends Model
         @mask
 
 exports.CommandCollection = class CommandCollection extends Collection
-    loadDirectory: (dirName, cb) ->
+    loadDirectory: (dirName, imports, cb) ->
         # Load commands from a folder containing commands. Each command file
         # should have `exports.commands` include all commands in the file
         # to be registered
-        console.log "Loading commands from #{dirName}"
+        
+        imports ?= {}
+        
+        if not cb? and _.isFunction imports
+            cb = imports
+            imports = {}
+        
+        console.log "Loading commands from #{dirName} with imports #{util.inspect imports}"
 
         success = 0
         fail = 0
@@ -92,7 +100,7 @@ exports.CommandCollection = class CommandCollection extends Collection
 
             fileName = path.join dirName, file
 
-            if @loadFile fileName
+            if @loadFile fileName, imports
                 success += 1
             else
                 fail += 1
@@ -103,7 +111,7 @@ exports.CommandCollection = class CommandCollection extends Collection
 
         do @updateValidCommands
 
-    loadFile: (filename, reload=false) ->
+    loadFile: (filename, imports={}, reload=false) ->
         # Load a command file that exports `exports.commands`
         try
             evalOptions =
@@ -111,6 +119,7 @@ exports.CommandCollection = class CommandCollection extends Collection
                 filename: filename
                 sandbox:
                     console: console
+                    imports: imports
                     Command: Command
                     require: (id) ->
                         if id.indexOf('.') == 0
@@ -132,6 +141,7 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
                 return true
 
             command.set 'fileName': filename
+            command.imports = imports
             @add command
             return true
         catch error

@@ -1,0 +1,15 @@
+{
+    "name": "coffeekeep.importer.rom",
+    "version": "0.0.1",
+    "main": "rom",
+    "private": true,
+
+    "dependencies" : {
+        "underscore": "~1.5.2"
+    },
+
+    "plugin": {
+        "consumes": ["importer"],
+        "provides": []
+    }
+}

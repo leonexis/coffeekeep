@@ -1,4 +1,4 @@
-{Model, Collection} = require './'
+{Model, Collection} = require './base'
 
 class Item extends Model
     defaults: ->

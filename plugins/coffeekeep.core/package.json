@@ -1,0 +1,14 @@
+{
+    "name": "coffeekeep.core",
+    "version": "0.0.1",
+    "main": "core",
+    "private": true,
+
+    "dependencies": {
+    },
+
+    "plugin": {
+        "consumes": ["log", "world"],
+        "provides": ["site", "mud"]
+    }
+}

@@ -1,17 +1,16 @@
-{ROMReader} = require './readers/rom'
-{Area} = require './model/area'
-{Room} = require './model/room'
-{Mob} = require './model/mob'
-{Item} = require './model/item'
+fs = require 'fs'
+util = require 'util'
 
 new Command
     name: 'import'
     acl: '-all +sysop'
     description: "Imports an area from a file."
     help: "Usage: import <file>"
+    consumes: ['importer', 'model']
     action: (context, request) ->
         {mob, room, world, area} = context
         {verb, args} = request
+        {importer, model} = imports
         if args.length < 1
             mob.print "You must specify a file"
 
@@ -37,9 +36,13 @@ new Command
 
         mob.print ''
 
-        rom = new ROMReader()
+        console.log "Have imports: #{util.inspect imports}"
 
-        rom.on 'area', (data) ->
+        importer = imports.importer.getImporter fs.readFileSync args[0]
+        if not importer?
+            mob.print "Could not find importer for this file."
+
+        importer.on 'area', (data) ->
             stats.area++
             if currentArea?
                 console.log "Starting new area, resetting previous area."
@@ -52,12 +55,12 @@ new Command
                 mob.print ''
                 return
 
-            currentArea = new Area data
+            currentArea = new model.models.area data
             world.areas.add currentArea
             printStatus "Creating area %c#{currentArea.id}%."
             mob.print ''
 
-        rom.on 'room', (data) ->
+        importer.on 'room', (data) ->
             stats.room++
             vroom = currentArea.vrooms.get(data.id)
             if vroom?
@@ -66,12 +69,12 @@ new Command
                 #console.log "Reloaded vRoom #{room.id} '#{room.get 'title'}'"
                 return
 
-            vroom = new Room data
+            vroom = new model.models.room data
             printStatus "Adding vRoom %c#{vroom.id}%. '%C#{vroom.get 'title'}%.'"
             #console.log "Adding vRoom #{room.id} '#{room.get 'title'}'"
             currentArea.vrooms.add vroom
 
-        rom.on 'mobile', (data) ->
+        importer.on 'mobile', (data) ->
             stats.mob++
             vmob = currentArea.vmobs.get(data.id)
             if vmob?
@@ -79,11 +82,11 @@ new Command
                 printStatus "Reloaded vMob %c#{vmob.id}%. '%C#{vmob.get 'name'}%.'"
                 return
 
-            vmob = new Mob data
+            vmob = new model.models.mob data
             printStatus "Adding vMob %c#{vmob.id}%. '%C#{vmob.get 'name'}%.'"
             currentArea.vmobs.add vmob
 
-        rom.on 'item', (data) ->
+        importer.on 'item', (data) ->
             stats.item++
             vitem = currentArea.vitems.get(data.id)
             if vitem?
@@ -91,14 +94,14 @@ new Command
                 printStatus "Reloaded vItem %c#{vitem.id}%. '%C#{vitem.get 'name'}%.'"
                 return
 
-            vitem = new Item data
+            vitem = new model.models.item data
             printStatus "Adding vItem %c#{vitem.id}%. '%C#{vitem.get 'name'}%.'"
             currentArea.vitems.add vitem
 
-        rom.on 'done', ->
+        importer.on 'done', ->
             #console.log "Imported last area, resetting it"
             resetArea currentArea
             printStatus("Done importing #{stats.area} areas, #{stats.room} rooms, #{stats.mob} mobs, #{stats.item} items")
 
-        rom.read args[0]
+        importer.read()
 

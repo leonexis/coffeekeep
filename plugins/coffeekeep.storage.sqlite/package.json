@@ -1,0 +1,16 @@
+{
+    "name": "coffeekeep.storage.sqlite",
+    "version": "0.0.1",
+    "main": "sqlite",
+    "private": true,
+
+    "dependencies" : {
+        "sqlite3": ">=2.1.17",
+        "underscore": ">=1.5.2"
+    },
+
+    "plugin": {
+        "consumes": ["log"],
+        "provides": ["storage"]
+    }
+}

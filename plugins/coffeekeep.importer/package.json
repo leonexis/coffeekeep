@@ -1,0 +1,14 @@
+{
+    "name": "coffeekeep.importer",
+    "version": "0.0.1",
+    "main": "importer",
+    "private": true,
+
+    "dependencies": {
+    },
+
+    "plugin": {
+        "consumes": ["log", "mud", "world", "model"],
+        "provides": ["importer"]
+    }
+}

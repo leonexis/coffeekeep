@@ -1,4 +1,4 @@
-{Model, Collection} = require './'
+{Model, Collection} = require './base'
 {RoomCollection} = require './room'
 {MobCollection} = require './mob'
 {ItemCollection} = require './item'

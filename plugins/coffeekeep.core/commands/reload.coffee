@@ -15,7 +15,7 @@ new Command
             when 'commands'
                 world.commands.forEach (command) ->
                     console.log "Reloading command #{command.id}"
-                    world.commands.loadFile command.get('fileName'), true
+                    world.commands.loadFile command.get('fileName'), command.imports, true
                     mob.print "Reloaded command #{command.id}."
             else
                 mob.print "Not a valid resource: #{args[0]}"

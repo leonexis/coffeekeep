@@ -45,3 +45,8 @@ exports.MudClientService = class MudClientService
     unregisterSession: (session) ->
         delete @sessions[session.term.id]
 
+exports.setup = (options, imports, cb) ->
+    {mud} = imports
+    mudClientIO = io.listen(imports.server, log: false).of '/mudClient'
+    mudClientService = new MudClientService mud, mudClientIO
+    cb null, mudClientService

@@ -35,7 +35,7 @@ tests = (callback) ->
         callback?() if code is 0
 
 task 'build', 'Build build/lib/ from lib/', ->
-    build 'lib/', 'build/lib/', ->
+    build 'plugins/', 'build/plugins/', ->
         build 'test/', 'build/test/'
 
 task 'docs', 'Build documentation in docs/', ->

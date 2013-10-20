@@ -1,9 +1,8 @@
 _ = require 'underscore'
 util = require 'util'
-{Model, Collection} = require './'
-{format} = require '../format'
-security = require '../security'
-
+{Model, Collection} = require './base'
+{format} = require '../coffeekeep.core/format'
+security = require '../coffeekeep.core/security'
 
 class Mob extends Model
     @gender:            # Appearance/portraial

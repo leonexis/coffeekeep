@@ -4,8 +4,8 @@ _ = require 'underscore'
 {EventEmitter} = require 'events'
 {splitFull} = require './util'
 {format} = require './format'
-{User} = require './model/user'
-{World} = require './model/world'
+{User} = require '../coffeekeep.model/user'
+{World} = require '../coffeekeep.model/world'
 
 exports.MudSession = class MudSession extends EventEmitter
     # TODO: allow "frontend" between mud session and terminal, for example
@@ -199,55 +199,21 @@ exports.MudService = class MudService extends EventEmitter
         @sessions.push session
 
 
-exports.startMud = (options={}) ->
+exports.startMud = (options, imports) ->
+    {world} = imports
     _.defaults options,
-        plugins:
-            './core/storage/sqlite':
-                database: "#{__dirname}/../coffeekeep.sqlite"
-        web:
-            host: process.env.IP ? '0.0.0.0'
-            port: process.env.PORT ? 8080
-        telnet:
-            host: process.env.IP ? '0.0.0.0'
-            port: process.env.TELNET_PORT ? 5555
+        host: process.env.IP ? '0.0.0.0'
+        port: process.env.PORT ? 8080
+        telnetPort: process.env.TELNET_PORT ? 5555
 
     optimist = require 'optimist'
     {app, httpServer} = require './app'
-    p = require '../package.json'
-    console.log "Starting CoffeeKeep #{p.version}"
 
-    world = null
     async.series [
-        (cb) ->
-            # Load plugins
-            console.log "Loading plugins"
-            for plugin, opts of options.plugins
-                console.log "Starting plugin #{plugin}"
-                mod = require plugin
-                mod.enable? opts
-            do cb
-
-        (cb) ->
-            # Load our world
-            console.log "Loading coffeekeep world"
-
-            world = new World()
-            world.fetch
-                success: -> do cb
-                error: (err) -> cb err
-
-        (cb) ->
-            # Call world startup
-            console.log "Triggering world startup"
-            world.startup (err) ->
-                cb err
-
         (cb) ->
             # Create web service
             io = require 'socket.io'
             {MudClientService} = require './terminal'
-            app.set 'coffeekeep world', world
-
             mudService = new MudService world
 
             mudClientIO = io.listen(httpServer, log: false).of '/mudClient'

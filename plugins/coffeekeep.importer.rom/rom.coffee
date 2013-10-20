@@ -1,11 +1,19 @@
 readers = require './'
 fs = require 'fs'
+events = require 'events'
 
-exports.ROMReader = class ROMReader extends readers.AreaReader
+class ROMReader extends events.EventEmitter
     debug: false
 
     ROM_DIRECTIONS: ['north', 'east', 'south', 'west', 'up', 'down']
+    
+    @canImport: (data) ->
+        return 5 if data[...5] is "#AREA"
+        return 0
 
+
+    constructor: (@data) ->
+        
     getString: ->
         # Get string up to ~
         data = @getLine()
@@ -30,8 +38,8 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
         `text = text.replace(/\s{2,}/g, ' ')`
         text.split ' '
 
-    read: (filename) ->
-        data = fs.readFileSync filename, encoding: 'ascii'
+    read: ->
+        data = @data
         state = null
         current = null
         @index = 0
@@ -219,8 +227,6 @@ exports.ROMReader = class ROMReader extends readers.AreaReader
 
         current
 
-
-
-
-
-exports.ROMReader = ROMReader
+module.exports = (options, imports, register) ->
+    imports.importer.register ROMReader
+    register null
