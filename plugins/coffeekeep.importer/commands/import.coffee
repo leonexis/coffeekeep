@@ -36,8 +36,6 @@ new Command
 
         mob.print ''
 
-        console.log "Have imports: #{util.inspect imports}"
-
         importer = imports.importer.getImporter fs.readFileSync args[0]
         if not importer?
             mob.print "Could not find importer for this file."

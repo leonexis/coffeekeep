@@ -1,4 +1,4 @@
-{Message} = require './format'
+{Message} = require './coffeekeep.core/format'
 
 new Command
     name: 'say'

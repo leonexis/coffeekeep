@@ -4,7 +4,7 @@ util = require 'util'
 coffee = require 'coffee-script'
 _ = require 'underscore'
 {splitFull} = require '../coffeekeep.core/util'
-{Model, Collection} = require './base'
+{Model, Collection} = require '../coffeekeep.model/base'
 security = require '../coffeekeep.core/security'
 
 
@@ -81,14 +81,14 @@ exports.CommandCollection = class CommandCollection extends Collection
         # Load commands from a folder containing commands. Each command file
         # should have `exports.commands` include all commands in the file
         # to be registered
-        
+
         imports ?= {}
-        
+
         if not cb? and _.isFunction imports
             cb = imports
             imports = {}
-        
-        console.log "Loading commands from #{dirName} with imports #{util.inspect imports}"
+
+        console.log "Loading commands from #{dirName}"
 
         success = 0
         fail = 0
@@ -114,6 +114,7 @@ exports.CommandCollection = class CommandCollection extends Collection
     loadFile: (filename, imports={}, reload=false) ->
         # Load a command file that exports `exports.commands`
         try
+            base = filename[...filename.lastIndexOf '.']
             evalOptions =
                 modulename: 'command_' + path.basename filename, '.coffee'
                 filename: filename
@@ -128,7 +129,6 @@ exports.CommandCollection = class CommandCollection extends Collection
 
             command = coffee.eval fs.readFileSync(filename, 'utf8'), evalOptions
 
-            base = filename[...filename.lastIndexOf '.']
             unless command instanceof Command
                 command = new Command command
 

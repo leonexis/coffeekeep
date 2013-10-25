@@ -5,6 +5,7 @@ module.exports = exports = [
         port: process.env.PORT ? 8080
     './coffeekeep.log'
     './coffeekeep.model'
+    './coffeekeep.interpreter'
     './coffeekeep.importer'
     './coffeekeep.importer.rom'
         packagePath: './coffeekeep.storage.sqlite'

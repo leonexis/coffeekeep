@@ -5,7 +5,7 @@ engine = require './engine'
 terminal = require './terminal'
 
 module.exports = (options, imports, register) ->
-    {log, world} = imports
+    {log, world, commands} = imports
     _.defaults options,
         host: process.env.IP ? '0.0.0.0'
         port: process.env.PORT ? 8080
@@ -14,10 +14,17 @@ module.exports = (options, imports, register) ->
     mud = new engine.MudService world
     app = null
     server = null
-    async.waterfall [
-        (cb) -> require('./app').setup options, imports, cb
-        (app, cb) -> 
-            app = app
+    async.series [
+        (cb) ->
+            commands.loadDirectory __dirname + '/commands'
+            world.commands = commands
+            cb null
+        (cb) -> 
+            require('./app').setup options, imports, (err, app_) ->
+                throw err if err?
+                app = app_
+                cb null
+        (cb) -> 
             server = app.get 'server'
             require('./terminal').setup options, {server:server, mud:mud}, cb
     ],  (err) ->

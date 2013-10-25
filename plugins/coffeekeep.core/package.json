@@ -8,7 +8,7 @@
     },
 
     "plugin": {
-        "consumes": ["log", "world"],
+        "consumes": ["log", "world", "interpreter", "commands"],
         "provides": ["site", "mud"]
     }
 }

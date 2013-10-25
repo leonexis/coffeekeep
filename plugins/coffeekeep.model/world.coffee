@@ -3,7 +3,6 @@ async = require 'async'
 {Model, Collection} = require './base'
 {Area, AreaCollection} = require './area'
 {Room} = require './room'
-{CommandCollection} = require './command'
 {UserCollection} = require './user'
 
 exports.World = class World extends Model
@@ -14,7 +13,6 @@ exports.World = class World extends Model
 
     initialize: ->
         @areas = new AreaCollection @
-        @commands = new CommandCollection @
         @users = new UserCollection @
         @world = @
 
@@ -22,7 +20,6 @@ exports.World = class World extends Model
         @loadCollections cb
 
     loadCollections: (callback) ->
-        @commands.loadDirectory __dirname + '/../coffeekeep.core/commands'
         async.parallel [
             (cb) =>
                 @users.fetch

@@ -1,6 +1,5 @@
 {Area, AreaCollection} = require './area'
 {Model, Collection} = require './base'
-{Command, CommandCollection} = require './command'
 {Item, ItemCollection} = require './item'
 {Mob, MobCollection} = require './mob'
 {Room, RoomCollection} = require './room'
@@ -26,7 +25,6 @@ module.exports = (options, imports, register) ->
 
     model = new ModelPlugin options, imports
     model.register 'area', Area, AreaCollection
-    model.register 'command', Command, CommandCollection
     model.register 'item', Item, ItemCollection
     model.register 'mob', Mob, MobCollection
     model.register 'room', Room, RoomCollection
