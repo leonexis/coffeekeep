@@ -15,10 +15,10 @@ class Room extends Model
         @items = new ItemCollection @
 
     getArea: ->
-        @collection.parent
+        @collection?.parent
 
     getLocationId: ->
-        "#{@getArea().id}##{@id}"
+        "#{@getArea()?.id}##{@id}"
 
     toString: ->
         "[Room #{@getLocationId()}]"
