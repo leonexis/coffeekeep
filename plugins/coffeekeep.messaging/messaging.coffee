@@ -64,13 +64,13 @@ module.exports = (options, imports, register) ->
                 toSubject: @toSubject
                 toTarget: @toTarget
 
-        toString: -> "[Message '#{toTarget.toString()}']"
-
         token: (token) ->
             isFirstCap = token[0] isnt token[0].toLowerCase()
             token = token.toLowerCase()
 
-            if @data.hasOwnProperty token and @data[token]?
+            log.debug "Message(#{@message}).token: #{token}" if options.debug
+
+            if @data.hasOwnProperty(token) and @data[token]?
                 return @data[token]
 
             switch token

@@ -21,7 +21,8 @@ new Command
 
         msg = new messaging.Message
             subject: mob
-            message: "%g{Name} #{verb}{s} '#{message}'%."
+            message: "%g{Name} #{verb}{s} '{content}'%."
+            content: message
 
         for othermob in room.getMobs()
             othermob.print msg.forObserver othermob
