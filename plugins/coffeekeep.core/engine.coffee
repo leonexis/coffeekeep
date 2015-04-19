@@ -51,10 +51,11 @@ exports.MudSession = class MudSession extends EventEmitter
             @user.getLocation()
             @processCommand 'l'
 
-        @socket.on 'close', =>
+        @socket.once 'close', =>
             console.log "Socket #{@socket} closed session for #{@user?.id or '(not logged in)'}"
             @user?.removeSession @
             @inputMode = 'closed'
+            @emit 'close'
 
         do @promptForLogin
 
@@ -190,12 +191,18 @@ exports.MudSession = class MudSession extends EventEmitter
 
 exports.MudService = class MudService extends EventEmitter
 
-    constructor: (@world) ->
+    constructor: (@options, @imports) ->
         @sessions = []
         @running = false
+        @world = @imports.world
+        @world.commands = @imports.commands
+        @world.interpreter = @imports.interpreter
 
     createSession: (socket) ->
         session = new MudSession @, socket
+        session.once 'close', =>
+            @sessions = _(@sessions).without session
+
         @sessions.push session
 
 
