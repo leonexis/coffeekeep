@@ -5,7 +5,8 @@ block headers
     script.
         ;(function() {
           window.onload = function() {
-            var socket = io.connect('/mudClient');
+            var ioUrl = window.location.protocol + "//" + window.location.host
+            var socket = io(ioUrl + '/mudClient');
             socket.on('connect', function() {
               var term = new Terminal({
                 cols: 80,
