@@ -1,0 +1,14 @@
+{
+    "name": "coffeekeep.messaging",
+    "version": "0.0.1",
+    "main": "messaging",
+    "private": true,
+
+    "dependencies": {
+    },
+
+    "plugin": {
+        "consumes": ["log", "mud", "world", "model", "interpreter"],
+        "provides": ["messaging"]
+    }
+}

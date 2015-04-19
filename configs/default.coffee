@@ -5,9 +5,22 @@ module.exports = exports = [
         port: process.env.PORT ? 8080
     './coffeekeep.log'
     './coffeekeep.model'
-    './coffeekeep.interpreter'
+        packagePath: './coffeekeep.interpreter'
+        debug: true
     './coffeekeep.importer'
     './coffeekeep.importer.rom'
         packagePath: './coffeekeep.storage.sqlite'
         database: path.join __dirname, '..', 'coffeekeep.sqlite'
+    ,
+        packagePath: './coffeekeep.messaging'
+        channels:
+            gossip:
+                format: '{Name} gossip{s}, "{text}"'
+            ooc:
+                format: '{Name} OOC{s}, "{text}"'
+            achat:
+                format: '{Name} achat{s}, "{text}"'
+            newbie:
+                format: '{Name} newbie{s}, "{text}"'
+
 ]

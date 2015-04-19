@@ -38,6 +38,7 @@ class Mob extends Model
         tattoos: {}                     # Invisible IDs assigned by other commands
 
         currentLocation: null
+        channels: {}                    # List of channels and subscription status
 
     initialize: ->
         @sessions = []
@@ -52,6 +53,7 @@ class Mob extends Model
             while history.length > Mob.maxLocationHistory
                 history.shift()
             @setCookie "mob_location_history", history
+        
 
     hasPermission: (acl, permission) -> @resolver.hasPermission acl, permission
     mustHavePermission: (acl, permission) ->
@@ -124,7 +126,7 @@ class Mob extends Model
         callback ?= ->
         context = @getContext context
 
-        @world.commands.doCommand context, commandStr, callback
+        @world.interpreter.doCommand context, commandStr, callback
 
     getContext: (context) ->
         room = @getLocation()
@@ -136,7 +138,7 @@ class Mob extends Model
 
     readlineCompleter: (context, line, callback) ->
         context = @getContext context
-        @world.commands.readlineCompleter context, line, callback
+        @world.interpreter.readlineCompleter context, line, callback
 
     ###
     Find unique and prefered target names based on the filter.

@@ -1,0 +1,14 @@
+{
+    "name": "coffeekeep.chat",
+    "version": "0.0.1",
+    "main": "chat",
+    "private": true,
+
+    "dependencies": {
+    },
+
+    "plugin": {
+        "consumes": ["log", "mud", "world", "model"],
+        "provides": ["chat"]
+    }
+}
