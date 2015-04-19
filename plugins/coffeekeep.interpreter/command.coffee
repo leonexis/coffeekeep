@@ -25,7 +25,7 @@ exports.Command = class Command extends Model
         completer: (context, request) ->
             [[], request.line]
 
-    toString: -> "[command #{@id}]"
+    toString: -> "[Command '#{@id}']"
 
     doCommand: (context, commandStr, callback) ->
         request = @parseCommand context, commandStr
@@ -77,6 +77,8 @@ exports.Command = class Command extends Model
         @mask
 
 exports.CommandCollection = class CommandCollection extends Collection
+    toString: -> "[CommandCollection of #{@parent}]"
+
     loadDirectory: (dirName, imports, cb) ->
         # Load commands from a folder containing commands. Each command file
         # should have `exports.commands` include all commands in the file
@@ -110,6 +112,7 @@ exports.CommandCollection = class CommandCollection extends Collection
             console.error "WARNING: Not all commands loaded successfully. Check configuration."
 
         do @updateValidCommands
+        @emit 'updateCommands'
 
     loadFile: (filename, imports={}, reload=false) ->
         # Load a command file that exports `exports.commands`
@@ -168,6 +171,13 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
             return models[0]
 
         commandModel
+
+    getCommands: ->
+        @map (command) =>
+            verb: command.id
+            aliases: command.get 'aliases'
+            category: command.get 'category'
+            acl: command.get 'acl'
 
     doCommand: (context, commandStr, callback) ->
         [verb, args...] = splitFull commandStr
