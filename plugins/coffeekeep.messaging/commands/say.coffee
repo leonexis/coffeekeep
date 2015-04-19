@@ -1,14 +1,14 @@
-{Message} = require './coffeekeep.core/format'
-
 new Command
     name: 'say'
     aliases: ['yell', 'growl']
     description: "Says (or yells, or growls) something to every mob in the room."
     help: "Usage: say (or yell, or growl) [message]"
+    consumes: ['messaging']
     action: (context, request) ->
         util = require 'util'
         {mob, room} = context
         {verb, args} = request
+        {messaging} = imports
 
         message = args.join(" ")
         speaker = mob.get 'name'
@@ -19,7 +19,7 @@ new Command
             when 'growl'
                 message = message.toLowerCase()
 
-        msg = new Message
+        msg = new messaging.Message
             subject: mob
             message: "%g{Name} #{verb}{s} '#{message}'%."
 

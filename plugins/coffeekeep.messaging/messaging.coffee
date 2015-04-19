@@ -1,5 +1,6 @@
 _ = require 'underscore'
 util = require 'util'
+path = require 'path'
 
 module.exports = (options, imports, register) ->
     {log, model, world, mud} = imports
@@ -373,5 +374,8 @@ module.exports = (options, imports, register) ->
     messaging =
         Message: Message
         channels: world.channels
+
+    world.commands.loadDirectory path.join(__dirname, 'commands'),
+        messaging: messaging
 
     register null, messaging: messaging
