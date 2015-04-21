@@ -32,7 +32,7 @@ getSync = (log, db) -> (method, model, options) ->
         when 'create'
             if db[url]?
                 process.nextTick ->
-                    options.error? new Error "Object at #{url} already exists"
+                    options.error? new ExistsError "Object at #{url} already exists"
                 return
 
             obj = JSON.stringify model.attributes
