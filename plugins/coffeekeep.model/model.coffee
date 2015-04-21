@@ -5,6 +5,7 @@
 {Room, RoomCollection} = require './room'
 {User, UserCollection} = require './user'
 {World, WorldCollection} = require './world'
+debug = require('debug') 'coffeekeep.model:register'
 
 class ModelPlugin
     constructor: (@options, @imports) ->
@@ -32,13 +33,21 @@ module.exports = (options, imports, register) ->
     model.register 'world', World, WorldCollection
 
     world = new model.models.world()
+    startup = ->
+        debug 'Starting up world'
+        world.startup (err) ->
+            return register err if err?
+            register null,
+                model: model
+                world: world
+
     world.fetch
-        error: (err) ->
+        error: (model, err, options) ->
+            debug 'Error while fetching world: %s %j', err, err
+            if err instanceof storage.NotFoundError
+                debug 'Got %s when trying to fetch world, creating a new one'
+                return startup()
+
             log.error "Could not fetch world: #{err.stack}"
             register err
-        success: ->
-            world.startup (err) ->
-                return register err if err?
-                register null,
-                    model: model
-                    world: world
+        success: startup

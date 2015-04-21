@@ -4,6 +4,17 @@ Augment a Backbone Model to use an in-memory key-value store
 ###
 util = require 'util'
 _ = require 'underscore'
+debug = require('debug') 'coffeekeep.storage.memory'
+
+class StorageError extends Error
+    # For instanceof to work, the following is required whenever subclassing
+    constructor: -> super
+
+class NotFoundError extends StorageError
+    constructor: -> super
+
+class ExistsError extends StorageError
+    constructor: -> super
 
 getSync = (log, db) -> (method, model, options) ->
     options ?= {}
@@ -12,6 +23,8 @@ getSync = (log, db) -> (method, model, options) ->
 
     log.info("SYNC: #{url}: #{method}, #{model.toString()}, "
              "#{JSON.stringify options}")
+    debug "sync: %s: %s, %j, %j", url, method, model, options
+
     if not url?
         throw new Error "Could not get url for this model #{util.inspect model}"
 
@@ -30,7 +43,7 @@ getSync = (log, db) -> (method, model, options) ->
         when 'update'
             unless db[url]?
                 process.nextTick ->
-                    options.error? new Error "Cannot update non-existant object at #{url}"
+                    options.error? new NotFoundError "Cannot update non-existant object at #{url}"
                 return
 
             obj = JSON.stringify model.attributes
@@ -52,8 +65,12 @@ getSync = (log, db) -> (method, model, options) ->
             else
                 # Read a single object
                 out = db[url]
+                debug "read object: %j", out
                 if _.isUndefined out
-                    out = null
+                    debug "_.isUndefined"
+                    return process.nextTick ->
+                        debug "send exception to %s", options.error
+                        options.error? new NotFoundError "Object not found"
                 else
                     out = JSON.parse out
 
@@ -68,6 +85,7 @@ getSync = (log, db) -> (method, model, options) ->
     model.trigger 'request', model, null, options
     null
 
+
 module.exports = (options, imports, register) ->
     _.defaults options,
         verbose: false
@@ -76,5 +94,8 @@ module.exports = (options, imports, register) ->
 
     register null,
         storage:
+            StorageError: StorageError
+            NotFoundError: NotFoundError
+            ExistsError: ExistsError
             sync: getSync imports.log, db
             _db: db

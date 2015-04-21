@@ -21,21 +21,24 @@ exports.run = ->
     argv = optimist.argv
     console.log "Loading configuration #{optimist.argv.c}"
     config = require optimist.argv.c
-    config = architect.resolveConfig config, path.join __dirname, 'plugins'
-    
+
     # Set custom log level
     loglevel = null
     loglevel = 'info' if argv.v
     loglevel = 'debug' if argv.d
-    
+
     if loglevel?
         for plugin in config
             if /coffeekeep\.log$/.test plugin.packagePath
                 plugin.level = loglevel
 
-    architect.createApp config, (err, app) ->
+    exports.createApp config, (err, app) ->
         throw err if err?
         console.log "Started CoffeeKeep #{pkg.version}!"
+
+exports.createApp = (config, cb) ->
+    config = architect.resolveConfig config, path.join __dirname, 'plugins'
+    architect.createApp config, cb
 
 if not module.parent?
     exports.run()

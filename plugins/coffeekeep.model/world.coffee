@@ -4,8 +4,10 @@ async = require 'async'
 {Area, AreaCollection} = require './area'
 {Room} = require './room'
 {UserCollection} = require './user'
+debug = require 'debug'
 
 exports.World = class World extends Model
+    debug: debug 'coffeekeep.model:World'
     url: '/world'
     defaults:
         startLocation: "default#start"

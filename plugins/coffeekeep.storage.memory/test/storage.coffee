@@ -1,29 +1,28 @@
-architect = require 'architect'
 path = require 'path'
 async = require 'async'
 config = require './config'
-should = require 'should'
+coffeekeep = require 'coffeekeep'
 
 describe 'coffeekeep.storage.memory', ->
     app = null
     storage = null
     model = null
     before (done) ->
-        pluginPath = path.join __dirname, '..', '..'
-        config = architect.resolveConfig config, pluginPath
-        architect.createApp config, (err, _app) ->
-            done err if err?
+        coffeekeep.createApp config, (err, _app) ->
+            return done err if err?
             app = _app
             storage = app.getService 'storage'
             model = app.getService 'model'
             done null
 
-    ###
+    after ->
+        app.destroy()
+
     describe 'model integration', ->
         world = null
 
         before ->
-            world = app.getService 'model'
+            world = app.getService 'world'
 
         it 'should support saving', (done) ->
             world.save null,
@@ -31,7 +30,6 @@ describe 'coffeekeep.storage.memory', ->
                     done null
                 error: (model, response, options) ->
                     done response
-    ###
 
     describe 'sync', ->
         sync = null
@@ -81,6 +79,17 @@ describe 'coffeekeep.storage.memory', ->
                 success: (newdata) ->
                     newdata.should.have.property 'foo', 'baz'
                     done null
+
+        it 'should error if resource not found', (done) ->
+            data = new FakeModel
+                url: '/nothere'
+
+            sync 'read', data,
+                error: (err) ->
+                    err.should.be.instanceof storage.NotFoundError
+                    done null
+                success: ->
+                    done new Error 'No error thrown'
 
         it 'should support read on collections', (done) ->
             db['/root/foo/bar'] = JSON.stringify
@@ -143,7 +152,7 @@ describe 'coffeekeep.storage.memory', ->
 
             sync 'update', data,
                 error: (err) ->
-                    err.should.be.an.Error
+                    err.should.be.instanceof storage.NotFoundError
                     done null
                 success: ->
                     done new Error 'Did not give an error!'
@@ -159,7 +168,7 @@ describe 'coffeekeep.storage.memory', ->
 
             sync 'create', data,
                 error: (err) ->
-                    err.should.be.an.Error
+                    err.should.be.instanceof storage.ExistsError
                     done null
                 success: ->
                     done new Error 'Did not give an error!'

@@ -1,30 +1,31 @@
 {
-	"name": "coffeekeep",
-	"description": "Coffee Keep MUD Engine",
-	"url": "http://github.com/leonexis/coffeekeep/issues",
-	"version": "0.0.1",
-	"main": "./lib/index.js",
-	"bin": "./bin/coffeekeep",
-	"license": "MIT",
-	"dependencies": {
-		"coffee-script": "~1.9.2",
-		"express": "~3.20.2",
-		"nodeunit": "~0.9.1",
-		"optimist": "~0.6.1",
-		"backbone": "~1.1.2",
-		"jade": "~1.9.2",
-		"underscore": "~1.8.3",
-		"term.js": "~0.0.4",
-		"socket.io": "~1.3.5",
-		"sqlite3": "~3.0.5",
-		"async": "~0.9.0",
-		"coffeedoc": "~0.3.1",
-		"mocha": "~2.2.4",
-		"should": "~6.0.1",
-		"architect": "~0.1.11",
-		"log": "~1.4.0"
-	},
-	"engine": {
-		"node": ">=0.10"
-	}
+  "name": "coffeekeep",
+  "description": "Coffee Keep MUD Engine",
+  "url": "http://github.com/leonexis/coffeekeep/issues",
+  "version": "0.0.1",
+  "main": "./lib/index.js",
+  "bin": "./bin/coffeekeep",
+  "license": "MIT",
+  "dependencies": {
+    "coffee-script": "~1.9.2",
+    "express": "~3.20.2",
+    "nodeunit": "~0.9.1",
+    "optimist": "~0.6.1",
+    "backbone": "~1.1.2",
+    "jade": "~1.9.2",
+    "underscore": "~1.8.3",
+    "term.js": "~0.0.4",
+    "socket.io": "~1.3.5",
+    "sqlite3": "~3.0.5",
+    "async": "~0.9.0",
+    "coffeedoc": "~0.3.1",
+    "mocha": "~2.2.4",
+    "should": "~6.0.1",
+    "architect": "~0.1.11",
+    "log": "~1.4.0",
+    "debug": "~2.1.3"
+  },
+  "engine": {
+    "node": ">=0.10"
+  }
 }

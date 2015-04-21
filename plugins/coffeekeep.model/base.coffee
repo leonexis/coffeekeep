@@ -2,8 +2,10 @@ backbone = require 'backbone'
 util = require 'util'
 async = require 'async'
 _ = require 'underscore'
+debug = require 'debug'
 
 exports.Model = class Model extends backbone.Model
+    debug: debug 'coffeekeep.model:base.Model'
     storedCollections: []
     constructor: (args...) ->
         @lastSync = null
@@ -11,11 +13,13 @@ exports.Model = class Model extends backbone.Model
 
         @on 'add', (model, collection, options) =>
             return unless @ is model
+            @debug "@on 'add' (%j, %j, %j)", model, collection, options
 
             # If the model was added to a collection via a fetch, make sure to
             # set lastSync
             # FIXME: This seems like a poor way to do it
             if options.merge
+                @debug "@on 'add': option.merge, setting @lastSync"
                 @lastSync = do Date.now
 
             # If we were loaded from the db, then load our collections
@@ -23,6 +27,7 @@ exports.Model = class Model extends backbone.Model
 
         @on 'sync', (model, collection, options) =>
             return unless @ is model
+            @debug "@on 'sync' (%j, %j, %j)", model, collection, options
             @lastSync = do Date.now
             do @saveCollections if options.recursive
 
@@ -138,22 +143,27 @@ exports.Model = class Model extends backbone.Model
     emit: (args...) -> @trigger args...
 
 exports.Collection = class Collection extends backbone.Collection
+    debug: debug 'coffeekeep.model:base.Collection'
     constructor: (@parent, args...) ->
         @on 'add', (model, collection, options) =>
             return unless collection is @
+            @debug "@on 'add' (%j, %j)", @parent, args
             model.world = collection.parent?.world
 
         @on 'remove', (model, collection, options) =>
             return unless collection is @
+            @debug "@on 'remove' (%j, %j, %j)", model, collection, options
             model.world = null
 
         @on 'sync', (collection, response, options) =>
             # Make sure lastSync is updated
             return unless collection is @
+            @debug "@on 'sync' (%j, %j, %j)", collection, response, options
 
 
         @parent.on 'destroy', (model, collection, options) =>
             return unless model is @parent
+            @debug "@parent.on 'destroy' (%j, %j, %j)", model, collection, options
             # TODO: remove all our children
 
         super args...
