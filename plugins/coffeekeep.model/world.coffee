@@ -13,6 +13,7 @@ exports.World = class World extends Model
         startLocation: "default#start"
         title: "CoffeeKeep"
 
+    toString: -> "[#{@constructor.name} #{@get 'title'}]"
     initialize: ->
         @areas = new AreaCollection @
         @users = new UserCollection @
@@ -26,22 +27,25 @@ exports.World = class World extends Model
             (cb) =>
                 @users.fetch
                     success: =>
-                        console.log "Loaded #{@users.length} users"
+                        @log.info "Loaded %d users", @users.length
                         do cb
                     error: (err) =>
                         cb err
             (cb) =>
                 @areas.fetch
                     success: =>
-                        console.log "Loaded #{@areas.length} areas"
+                        @log.info "Loaded %d areas", @areas.length
                         do cb
                     error: (err) =>
                         cb err
         ], (err) =>
-            console.log "loadCollections complete: #{err}"
-            callback err if err?
+            if err
+                @log.error "Error while loading collections", err
+                return callback err
+
+            @log.info "loadCollections complete"
             if @areas.length is 0
-                console.log "There are no areas loaded. Let me make one for you."
+                @log.info "There are no areas loaded. Let me make one for you."
                 return @createStarterArea callback
             do callback
 
@@ -85,7 +89,7 @@ exports.World = class World extends Model
         ], (err) ->
             callback err
         ###
-        console.log "Creating a new area"
+        @log.info "Creating a new area"
         area = new Area
             id: "default"
             title: "Default Area"
@@ -97,7 +101,7 @@ exports.World = class World extends Model
         area.vrooms.add vroom
         room = vroom.cloneVirtual()
         area.rooms.add room
-        console.log "Setting new room as the world start location"
+        @log.info "Setting new room as the world start location"
         @world.set 'startLocation', room.getLocationId()
         callback null
 
@@ -111,7 +115,7 @@ exports.World = class World extends Model
                 if room?
                     return room
 
-        console.error "Could not load the start location, trying first room of first area."
+        @log.error "Could not load the start location, trying first room of first area."
 
         area = @areas.first()
         if not area?

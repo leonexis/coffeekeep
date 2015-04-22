@@ -5,9 +5,14 @@ _ = require 'underscore'
 debug = require 'debug'
 
 exports.Model = class Model extends backbone.Model
-    debug: debug 'coffeekeep.model:base.Model'
+    _debug: debug 'coffeekeep.model:base.Model'
+    debug: (args...) ->
+        @_debug args...
+        @log.silly args...
+
     storedCollections: []
     constructor: (args...) ->
+        @log = new @Logger => @toString()
         @lastSync = null
         @virtual = null
 
@@ -38,6 +43,7 @@ exports.Model = class Model extends backbone.Model
 
         super args...
 
+    toString: -> "[#{@constructor.name} #{@id}]"
     isNew: -> not @lastSync?
 
     url: ->
@@ -143,8 +149,14 @@ exports.Model = class Model extends backbone.Model
     emit: (args...) -> @trigger args...
 
 exports.Collection = class Collection extends backbone.Collection
-    debug: debug 'coffeekeep.model:base.Collection'
+    _debug: debug 'coffeekeep.model:base.Model'
+    debug: (args...) ->
+        @_debug args...
+        @log.silly args...
+
     constructor: (@parent, args...) ->
+        @log = new @Logger => @toString()
+
         @on 'add', (model, collection, options) =>
             return unless collection is @
             @debug "@on 'add' (%j, %j)", @parent, args
@@ -168,14 +180,16 @@ exports.Collection = class Collection extends backbone.Collection
 
         super args...
 
+    toString: -> "[#{@constructor.name} in #{@parent?.toString()}]"
     url: ->
         if not @parent?
-            console.error "Tried to get container url for #{util.inspect @}, but no @parrent."
+            @log.error "Tried to get container url for %j, but no @parrent.", @
             return null
 
         parentUrl = _.result @parent, 'url'
         if not parentUrl? or not @urlPart?
-            console.error "Tried to get container url for #{util.inspect @}, but missing #{parentUrl} or #{@urlPart}"
+            @log.error "Tried to get container url for %j, but missing parentUrl (%s)
+                or @urlPart (%s)", parentUrl, @urlPart
             return null
 
         parentUrl + '/' + @urlPart + '/'

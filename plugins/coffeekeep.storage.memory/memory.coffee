@@ -21,8 +21,9 @@ getSync = (log, db) -> (method, model, options) ->
 
     url = _.result model, 'url'
 
-    log.info("SYNC: #{url}: #{method}, #{model.toString()}, "
-             "#{JSON.stringify options}")
+    log.silly "coffeekeep.storage.memory",
+        "sync: %s: %s, %j, %j", url, method, model, options
+
     debug "sync: %s: %s, %j, %j", url, method, model, options
 
     if not url?
@@ -57,6 +58,7 @@ getSync = (log, db) -> (method, model, options) ->
                 out = _.chain db
                     .keys()
                     .filter (key) -> key.indexOf(url) == 0
+                    .filter (key) -> key[url.length..].indexOf('/') == -1
                     .map (key) -> JSON.parse db[key]
                     .value()
 

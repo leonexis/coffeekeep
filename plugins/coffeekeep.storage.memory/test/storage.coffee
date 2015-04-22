@@ -96,7 +96,7 @@ describe 'coffeekeep.storage.memory', ->
                 one: 'one'
             db['/root/foo/baz'] = JSON.stringify
                 two: 'two'
-            db['/root/foo/'] = JSON.stringify
+            db['/root/foo'] = JSON.stringify
                 three: 'three'
 
             root = new FakeModel
@@ -109,10 +109,10 @@ describe 'coffeekeep.storage.memory', ->
                 error: (err) ->
                     done err
                 success: (newdata) ->
-                    newdata.should.have.length 3
+                    newdata.should.have.length 2
                     newdata.should.containDeep [{one:'one'}]
                     newdata.should.containDeep [{two:'two'}]
-                    newdata.should.containDeep [{three:'three'}]
+                    newdata.should.not.containDeep [{three:'three'}]
                     done null
 
         it 'should support update', (done) ->
@@ -172,3 +172,27 @@ describe 'coffeekeep.storage.memory', ->
                     done null
                 success: ->
                     done new Error 'Did not give an error!'
+
+        it 'should not return sub-children during a collection read', (done) ->
+            db['/root/foo/bar'] = JSON.stringify
+                one: 'one'
+            db['/root/foo/baz'] = JSON.stringify
+                two: 'two'
+            db['/root/foo/baz/foo'] = JSON.stringify
+                three: 'three'
+
+            root = new FakeModel
+                url: '/root'
+
+            data = new FakeCollection root,
+                url: 'foo'
+
+            sync 'read', data,
+                error: (err) ->
+                    done err
+                success: (newdata) ->
+                    newdata.should.have.length 2
+                    newdata.should.containDeep [{one:'one'}]
+                    newdata.should.containDeep [{two:'two'}]
+                    newdata.should.not.containDeep [{three:'three'}]
+                    done null

@@ -34,7 +34,7 @@ exports.Area = class Area extends Model
 
     # Reset the area
     reset: ->
-        console.log "#{@}: Resetting area"
+        @log.info "Resetting area"
         tasks = 1 + @vrooms.length
         current = 0
         @emit 'progress:reset', ++current, tasks, "Clear rooms"
@@ -45,7 +45,7 @@ exports.Area = class Area extends Model
             room = vroom.cloneVirtual()
             @rooms.add room
 
-        console.log "#{@}: Reset complete"
+        @log.info "Reset complete"
 
 exports.AreaCollection = class AreaCollection extends Collection
     model: Area

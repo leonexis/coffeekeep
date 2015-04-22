@@ -23,6 +23,7 @@ module.exports = (options, imports, register) ->
     {log, storage} = imports
 
     Model::sync = Collection::sync = storage.sync
+    Model::Logger = Collection::Logger = log.Logger
 
     model = new ModelPlugin options, imports
     model.register 'area', Area, AreaCollection

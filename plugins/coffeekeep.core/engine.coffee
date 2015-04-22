@@ -6,12 +6,14 @@ _ = require 'underscore'
 {format} = require './format'
 {User} = require '../coffeekeep.model/user'
 {World} = require '../coffeekeep.model/world'
+util = require 'util'
 
 exports.MudSession = class MudSession extends EventEmitter
     # TODO: allow "frontend" between mud session and terminal, for example
     # using blessed for curses support
     constructor: (@service, @socket) ->
         @world = @service.world
+        @log = new @service.imports.log.Logger => @toString()
         @user = null #@world.users.first()
         #@user.addSession @
         @inputMode = 'login'
@@ -33,14 +35,14 @@ exports.MudSession = class MudSession extends EventEmitter
                     @processCommand line, (error) =>
                         if error?
                             @write "Error while processing command '#{line}': #{error.toString()}"
-                            console.error "Error while processing command: #{error.stack}"
+                            @log.error "Error while processing command '%s'", line, error
                             do @updatePrompt
                 else
                     # Blank line, redisplay prompt
                     do @updatePrompt
             catch error
                 @write "Error while processing command '#{line}': #{error.toString()}"
-                console.error "Error while processing command: #{error.stack}"
+                @log.error "Error while processing command: '%s'", line, error
                 do @updatePrompt
 
         @rl.on 'SIGINT', -> true
@@ -48,11 +50,12 @@ exports.MudSession = class MudSession extends EventEmitter
         @rl.on 'SIGCONT', -> true
 
         @on 'login', =>
+            @log.info "User logged in"
             @user.getLocation()
             @processCommand 'l'
 
         @socket.once 'close', =>
-            console.log "Socket #{@socket} closed session for #{@user?.id or '(not logged in)'}"
+            @log.info "Socket #{@socket} closed session for #{@user?.id or '(not logged in)'}"
             @user?.removeSession @
             @inputMode = 'closed'
             @emit 'close'
@@ -81,6 +84,9 @@ exports.MudSession = class MudSession extends EventEmitter
                         return
                     else
                         @write "You can't fool me!\r\n\r\n"
+                        # TODO: show connection information like IP for telnet
+                        @log.warn "Failed login attempt for user %s from %s",
+                            username, @socket?.term?.conn?.remoteAddress
                         do @promptForLogin
                         return
             else
@@ -187,11 +193,15 @@ exports.MudSession = class MudSession extends EventEmitter
     prompt: -> @rl.prompt
     question: (query, callback) -> @rl.question query, callback
     setEcho: (echo) -> @rl.setEcho echo
+    toString: ->
+        # TODO: remoteAddress on telnet
+        "[MudSession for #{@user?.id or '(new)'} on #{@socket?.term?.conn?.remoteAddress}]"
 
 
 exports.MudService = class MudService extends EventEmitter
 
     constructor: (@options, @imports) ->
+        @log = new @imports.log.Logger "MudService"
         @sessions = []
         @running = false
         @world = @imports.world
@@ -207,7 +217,7 @@ exports.MudService = class MudService extends EventEmitter
 
 
 exports.startMud = (options, imports) ->
-    {world} = imports
+    {world, log} = imports
     _.defaults options,
         host: process.env.IP ? '0.0.0.0'
         port: process.env.PORT ? 8080
@@ -221,7 +231,7 @@ exports.startMud = (options, imports) ->
             # Create web service
             io = require 'socket.io'
             {MudClientService} = require './terminal'
-            mudService = new MudService world
+            mudService = new MudService imports
 
             mudClientIO = io.listen(httpServer, log: false).of '/mudClient'
             mudClientService = new MudClientService mudService, mudClientIO
