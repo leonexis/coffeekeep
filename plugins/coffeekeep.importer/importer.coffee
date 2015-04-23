@@ -20,7 +20,7 @@ class JSONReader extends events.EventEmitter
     constructor: (@data) ->
 
     read: ->
-        console.log "AreaReader: #{@data}"
+        @log?.debug "AreaReader: #{@data}"
         areaFile = JSON.parse @data
         if not areaFile?
             return
@@ -41,12 +41,17 @@ class JSONReader extends events.EventEmitter
 
 module.exports = (options, imports, register) ->
     {mud, log, world} = imports
+
+    JSONReader::log = new log.Logger "JSONReader"
+
     class ImporterPlugin
         importers: {}
+        constructor: ->
+            @log = new log.Logger @constructor.name
 
         register: (importer) ->
             @importers[importer.name] = importer
-            log.info "Registered importer #{importer.name}"
+            @log.info "Registered importer %s", importer.name
             mud.emit "importer:register", importer
 
         unregister: (importer) ->
@@ -61,18 +66,18 @@ module.exports = (options, imports, register) ->
                         delete @importers[k]
                         break
 
-            log.info "Unregistered importer #{name}"
+            @log.info "Unregistered importer %s", name
             mud.emit "importer:unregister", name
 
         getImporter: (data) ->
             data = data.toString()
-            log.debug "Finding importer for #{JSON.stringify data[..20]}..."
+            @log.debug "Finding importer for %j", data[..20]
             best = null
             maxScore = 0
             for k, v of @importers
                 importer = @importers[k]
                 score = importer.canImport data
-                log.debug "Importer #{importer.name} has score of #{score}"
+                @log.debug "Importer %s has score of %d", importer.name, score
                 if score > maxScore
                     maxScore = score
                     best = importer

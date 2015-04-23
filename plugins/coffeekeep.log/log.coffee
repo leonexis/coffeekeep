@@ -15,12 +15,13 @@ class Logger
 
 log.Logger = Logger
 log.addLevel 'debug', 500, {fg: 'grey', bg: 'black'}, 'dbug'
-log.addLevel 'notice', 3000, {fg: 'green', bg: 'black'}
+log.addLevel 'notice', 3000, {fg: 'green', bg: 'black'}, 'note'
 
 module.exports = (options, imports, register) ->
     _.defaults options,
         level: 'info'
 
     log.level = options.level
+    log.info 'coffeekeep.log', 'Current log level: %s', log.level
     register null,
         log: log

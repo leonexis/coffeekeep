@@ -6,27 +6,26 @@ class ROMReader extends events.EventEmitter
     debug: false
 
     ROM_DIRECTIONS: ['north', 'east', 'south', 'west', 'up', 'down']
-    
+
     @canImport: (data) ->
         return 5 if data[...5] is "#AREA"
         return 0
 
-
     constructor: (@data) ->
-        
+
     getString: ->
         # Get string up to ~
         data = @getLine()
         while data? and data.indexOf("~") == -1
             data += '\n' + @getLine()
         data = data.split('~')[0]
-        console.log "Got string #{data}" if @debug
+        @log?.silly "Got string #{data}"
         data
 
     getLine: ->
         [@line, @lines...] = @lines
         @lineIndex += 1
-        #console.log "Parsing line #{@lineIndex}/#{@linesTotal}: #{@line}" if @debug
+        @log?.silly "Parsing line %d/%d: %j", @lineIndex, @linesTotal, @line
         if not @line?
             throw new Error "End of file"
         @line
@@ -52,19 +51,19 @@ class ROMReader extends events.EventEmitter
                 # Eat everything up until the next section
                 continue
 
-            console.log "Found marker #{@line}" if @debug
+            @log?.debug "Found marker %s", @line
             @index = Number @line[1..]
 
             if not @index? or Number.isNaN @index
                 state = @line[1..].toLowerCase()
-                console.log "Marker is a new section #{state} (#{@line})" if @debug
+                @log?.silly "Marker is a new section %s (%j)", state, @line
                 if state in ['mobiles', 'rooms', 'objects']
                     # These require restarting to find new index
                     continue
             else
-                console.log "Marker is new index #{@index}" if @debug
+                @log?.silly "Marker is new index %d", @index
                 if @index == 0
-                    console.log "End of section found, skipping" if @debug
+                    @log?.silly "End of section found, skipping"
                     continue
 
             switch state
@@ -83,7 +82,7 @@ class ROMReader extends events.EventEmitter
                     when 'mobiles' then 'mobile'
                     when 'objects' then 'item'
                     else state
-                console.log "Emitting #{emitState}, #{JSON.stringify current}" if @debug
+                @log?.debug "Emitting %s, %j", emitState, current
                 @emit emitState, current
 
             current = null
@@ -228,5 +227,6 @@ class ROMReader extends events.EventEmitter
         current
 
 module.exports = (options, imports, register) ->
+    ROMReader::log = new imports.log.Logger "ROMReader"
     imports.importer.register ROMReader
     register null
