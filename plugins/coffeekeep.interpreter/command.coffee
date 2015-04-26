@@ -126,11 +126,13 @@ exports.CommandCollection = class CommandCollection extends Collection
     # Load a command file that exports `exports.commands`
     try
       base = filename[...filename.lastIndexOf '.']
+      modulename = 'command_' + path.basename filename, '.coffee'
       evalOptions =
-        modulename: 'command_' + path.basename filename, '.coffee'
+        modulename: modulename
         filename: filename
         sandbox:
           console: console
+          log: new @log.constructor modulename
           imports: imports
           Command: Command
           require: (id) ->

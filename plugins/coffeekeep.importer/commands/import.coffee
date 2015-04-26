@@ -22,9 +22,9 @@ new Command
       area: 0
       item: 0
 
-    printStatus = (status) =>
+    printStatus = (status) ->
       mob.print "\x1b[1A\x1b[2K#{status}"
-      @log.debug status
+      log.debug status
 
     updateProgress = (task, total, action) ->
       printStatus "Area reset: [#{task}/#{total}] #{action}"
@@ -44,7 +44,7 @@ new Command
     importer.on 'area', (data) ->
       stats.area++
       if currentArea?
-        @log.info "Starting new area, resetting previous area."
+        log.info "Starting new area, resetting previous area."
         resetArea currentArea
 
       currentArea = world.areas.get data.id

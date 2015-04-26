@@ -21,7 +21,7 @@ class InterpreterPlugin extends EventEmitter
     @updateCommands()
 
   doCommand: (context, commandStr, callback) ->
-    @log.silly "doCommand: '%s', %j", commandStr, context
+    @log.silly "doCommand: '%s', %s", commandStr, context
     [verb, args...] = commandStr.split /\s+/
     if not verb? or verb is ""
       return callback null, false
@@ -36,7 +36,7 @@ class InterpreterPlugin extends EventEmitter
     provider.doCommand context, commandStr, callback
 
   readlineCompleter: (context, line, callback) ->
-    @log.silly "readlineCompleter: '%s', %j", line, context
+    @log.silly "readlineCompleter: '%s', %s", line, context
     [verb, args...] = line.split /\s+/
     hits = []
     verbs = @verbsForMob context.mob

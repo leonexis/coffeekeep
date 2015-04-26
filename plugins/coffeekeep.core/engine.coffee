@@ -36,14 +36,16 @@ exports.MudSession = class MudSession extends EventEmitter
             if error?
               @write "Error while processing command '#{line}':
                 #{error.toString()}"
-              @log.error "Error while processing command '%s'", line, error
+              @log.error "Error while processing command '%s', %s, %s", line,
+                error, error.stack
               do @updatePrompt
         else
           # Blank line, redisplay prompt
           do @updatePrompt
       catch error
         @write "Error while processing command '#{line}': #{error.toString()}"
-        @log.error "Error while processing command: '%s'", line, error
+        @log.error "Error while processing command: '%s'", line, error,
+          error.stack
         do @updatePrompt
 
     @rl.on 'SIGINT', -> true

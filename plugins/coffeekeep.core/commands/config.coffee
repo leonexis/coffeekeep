@@ -8,10 +8,10 @@ new Command
   help: "Usage: config [self|world|area] [list|get|set|delete] <key> <data>"
   completer: (context, request) ->
     {verb, args} = request
-    @log.debug "config completer: %j", request
+    log.debug "config completer: %j", request
     hits = []
     targets = context.mob.getTargets context
-    @log.debug "targets: %j", targets
+    log.debug "targets: %j", targets
     if args.length is 1
       for target, model of targets
         continue if args[0] isnt '' and target.indexOf(args[0]) isnt 0

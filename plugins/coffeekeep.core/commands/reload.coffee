@@ -14,7 +14,7 @@ new Command
     switch args[0].toLowerCase()
       when 'commands'
         world.commands.forEach (command) ->
-          @log.info "Reloading command #{command.id}"
+          log.info "Reloading command #{command.id}"
           world.commands.loadFile command.get('fileName'), command.imports, true
           mob.print "Reloaded command #{command.id}."
       else
