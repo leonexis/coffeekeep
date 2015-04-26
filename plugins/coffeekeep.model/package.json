@@ -1,16 +1,16 @@
 {
-    "name": "coffeekeep.model",
-    "version": "0.0.1",
-    "main": "model",
-    "private": true,
+  "name": "coffeekeep.model",
+  "version": "0.0.1",
+  "main": "model",
+  "private": true,
 
-    "dependencies" : {
-        "backbone": "~1.0.0",
-        "underscore": "~1.5.2"
-    },
+  "dependencies" : {
+    "backbone": "~1.0.0",
+    "underscore": "~1.5.2"
+  },
 
-    "plugin": {
-        "consumes": ["log", "storage"],
-        "provides": ["model", "world"]
-    }
+  "plugin": {
+    "consumes": ["log", "storage"],
+    "provides": ["model", "world"]
+  }
 }

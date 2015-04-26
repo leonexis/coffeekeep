@@ -1,5 +1,5 @@
 module.exports = [
-    './coffeekeep.log'
-    './coffeekeep.model'
-    './coffeekeep.storage.memory'
+  './coffeekeep.log'
+  './coffeekeep.model'
+  './coffeekeep.storage.memory'
 ]

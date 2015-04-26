@@ -1,15 +1,15 @@
 {
-    "name": "coffeekeep.log",
-    "version": "0.0.1",
-    "main": "log",
-    "private": true,
+  "name": "coffeekeep.log",
+  "version": "0.0.1",
+  "main": "log",
+  "private": true,
 
-    "dependencies" : {
-        "log": "~1.4.0"
-    },
+  "dependencies" : {
+    "log": "~1.4.0"
+  },
 
-    "plugin": {
-        "consumes": [],
-        "provides": ["log"]
-    }
+  "plugin": {
+    "consumes": [],
+    "provides": ["log"]
+  }
 }

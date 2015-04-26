@@ -1,11 +1,11 @@
 {
-    "name": "coffeekeep.interpreter",
-    "version": "0.0.1",
-    "main": "interpreter",
-    "private": true,
+  "name": "coffeekeep.interpreter",
+  "version": "0.0.1",
+  "main": "interpreter",
+  "private": true,
 
-    "plugin": {
-        "consumes": ["model", "log", "world"],
-        "provides": ["interpreter", "commands"]
-    }
+  "plugin": {
+    "consumes": ["model", "log", "world"],
+    "provides": ["interpreter", "commands"]
+  }
 }

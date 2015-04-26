@@ -1,15 +1,15 @@
 {
-    "name": "coffeekeep.storage.memory",
-    "version": "0.0.1",
-    "main": "memory",
-    "private": true,
+  "name": "coffeekeep.storage.memory",
+  "version": "0.0.1",
+  "main": "memory",
+  "private": true,
 
-    "dependencies" : {
-        "underscore": ">=1.5.2"
-    },
+  "dependencies" : {
+    "underscore": ">=1.5.2"
+  },
 
-    "plugin": {
-        "consumes": ["log"],
-        "provides": ["storage"]
-    }
+  "plugin": {
+    "consumes": ["log"],
+    "provides": ["storage"]
+  }
 }

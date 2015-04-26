@@ -1,14 +1,14 @@
 {
-    "name": "coffeekeep.core",
-    "version": "0.0.1",
-    "main": "core",
-    "private": true,
+  "name": "coffeekeep.core",
+  "version": "0.0.1",
+  "main": "core",
+  "private": true,
 
-    "dependencies": {
-    },
+  "dependencies": {
+  },
 
-    "plugin": {
-        "consumes": ["log", "world", "interpreter", "commands"],
-        "provides": ["site", "mud"]
-    }
+  "plugin": {
+    "consumes": ["log", "world", "interpreter", "commands"],
+    "provides": ["site", "mud"]
+  }
 }
