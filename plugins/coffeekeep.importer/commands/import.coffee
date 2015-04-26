@@ -24,6 +24,7 @@ new Command
 
         printStatus = (status) =>
             mob.print "\x1b[1A\x1b[2K#{status}"
+            @log.debug status
 
         updateProgress = (task, total, action) =>
             printStatus "Area reset: [#{task}/#{total}] #{action}"
@@ -43,7 +44,7 @@ new Command
         importer.on 'area', (data) ->
             stats.area++
             if currentArea?
-                console.log "Starting new area, resetting previous area."
+                @log.info "Starting new area, resetting previous area."
                 resetArea currentArea
 
             currentArea = world.areas.get data.id
@@ -64,12 +65,10 @@ new Command
             if vroom?
                 vroom.set data
                 printStatus "Reloaded vRoom %c#{vroom.id}%. '%C#{vroom.get 'title'}%.'"
-                #console.log "Reloaded vRoom #{room.id} '#{room.get 'title'}'"
                 return
 
             vroom = new model.models.room data
             printStatus "Adding vRoom %c#{vroom.id}%. '%C#{vroom.get 'title'}%.'"
-            #console.log "Adding vRoom #{room.id} '#{room.get 'title'}'"
             currentArea.vrooms.add vroom
 
         importer.on 'mobile', (data) ->
@@ -97,9 +96,7 @@ new Command
             currentArea.vitems.add vitem
 
         importer.on 'done', ->
-            #console.log "Imported last area, resetting it"
             resetArea currentArea
             printStatus("Done importing #{stats.area} areas, #{stats.room} rooms, #{stats.mob} mobs, #{stats.item} items")
 
         importer.read()
-

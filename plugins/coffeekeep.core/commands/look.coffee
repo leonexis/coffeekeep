@@ -49,7 +49,7 @@ new Command
                     mob.print "    %m#{othermob.getDisplayText context}%."
 
             when 'self'
-                console.log JSON.stringify util
+                # TODO: Write a better report when looing at self
                 mob.write util.inspect mob.attributes
                 mob.print ''
 
@@ -65,5 +65,4 @@ new Command
                             return
 
                 # TODO: directions
-
                 mob.print 'Sorry, you can only currently look at the room or yourself. Perhaps buy better glasses?'

@@ -8,10 +8,10 @@ new Command
     help: "Usage: config [self|world|area] [list|get|set|delete] <key> <data>"
     completer: (context, request) ->
         {verb, args} = request
-        console.log "config completer: #{JSON.stringify request}"
+        @log.debug "config completer: %j", request
         hits = []
         targets = context.mob.getTargets context
-        console.log "targets: #{util.inspect targets}"
+        @log.debug "targets: %j", targets
         if args.length is 1
             for target, model of targets
                 continue if args[0] isnt '' and target.indexOf(args[0]) isnt 0
@@ -68,7 +68,7 @@ new Command
                     else
                         mob.print " %c#{k}%.: %K#{JSON.stringify v} (default)%."
                     seen.push k
-                
+
                 if targetObj.virtual?
                     for k, v of targetObj.virtual.attributes
                         continue if k in seen
@@ -77,7 +77,7 @@ new Command
                             mob.print " %c#{k}%.: #{JSON.stringify attrs[k]} %y(virtual: #{JSON.stringify v})%."
                         else
                             mob.print " %c#{k}%.: #{JSON.stringify v} %g(virtual)%."
-                
+
                 for k, v of attrs
                     continue if k in seen
                     mob.print " %c#{k}%.: #{JSON.stringify v}"

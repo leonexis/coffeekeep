@@ -142,7 +142,7 @@ exports.MudSession = class MudSession extends EventEmitter
         switch @inputMode
             when 'normal' then @user.readlineCompleter context, line, (err, data) =>
                 if err?
-                    console.log "error in readlineCompleter: #{err.stack}"
+                    @log.error "error in readlineCompleter", err
                 callback err, data
             else [[], line]
 
@@ -217,7 +217,9 @@ exports.MudService = class MudService extends EventEmitter
 
 
 exports.startMud = (options, imports) ->
+    # FIXME: This appears to not be used
     {world, log} = imports
+    _log = new log.Logger "coffeekeep.core:startMud"
     _.defaults options,
         host: process.env.IP ? '0.0.0.0'
         port: process.env.PORT ? 8080
@@ -236,15 +238,15 @@ exports.startMud = (options, imports) ->
             mudClientIO = io.listen(httpServer, log: false).of '/mudClient'
             mudClientService = new MudClientService mudService, mudClientIO
 
-            console.log "Starting web services: #{JSON.stringify options.web}"
+            _log.notice "Starting web services: #{JSON.stringify options.web}"
             try
                 httpServer.listen options.web.port, options.web.host, ->
-                    console.log "Started web service at #{options.web.host}:#{options.web.port}"
+                    _log.notice "Started web service at #{options.web.host}:#{options.web.port}"
                     do cb
             catch err
-                console.error "Error while starting web services: #{err}"
+                _log.error "Error while starting web services", err
                 do cb err
     ], ->
-        console.log "Startup complete"
+        _log.notice "Startup complete"
 
     world

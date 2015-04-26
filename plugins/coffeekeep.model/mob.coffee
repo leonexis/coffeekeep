@@ -53,7 +53,7 @@ class Mob extends Model
             while history.length > Mob.maxLocationHistory
                 history.shift()
             @setCookie "mob_location_history", history
-        
+
 
     hasPermission: (acl, permission) -> @resolver.hasPermission acl, permission
     mustHavePermission: (acl, permission) ->
@@ -99,8 +99,8 @@ class Mob extends Model
         [areaId, roomId] = loc.split '#'
         area = @world.areas.get areaId
         if not area?
-            console.error "ERROR: the area where #{@id}:#{@get 'title'} was
- located no longer exists! Putting him in the first room of the first area."
+            @log.error "The area where #{@id}:#{@get 'title'} was
+                located no longer exists! Putting him in the starting room"
             room = @world.getStartRoom()
             @set 'currentLocation', room.getLocationId()
         else

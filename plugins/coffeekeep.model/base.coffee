@@ -49,24 +49,24 @@ exports.Model = class Model extends backbone.Model
     url: ->
         # TODO make sure that id is urlescaped!
         if not @collection?
-            console.error "Tried to get url for #{util.inspect @}, but no collection"
+            @log.error "Tried to get url for #{util.inspect @}, but no collection"
             return null
         containerUrl = _.result @collection, 'url'
         containerUrl + @id
 
     loadCollections: (callback) ->
         return if @storedCollections.length is 0
-        console.log "Loading children for #{do @toString}"
+        @log.info "Loading my children"
 
         async.each @storedCollections,
             (collection, cb) =>
                 @[collection].fetch
                     success: =>
-                        console.log "#{@}: Loaded #{@[collection].length} #{collection}"
+                        @log.notice "Loaded %d %s", @[collection].length, collection
                         @emit 'loadedCollection', @[collection], @
                         do cb
                     error: (err) =>
-                        console.error "Error while fetching collections: #{err.stack}"
+                        @log.error "Error while fetching collections:", err
                         cb err
             (err) =>
                 @emit 'loadedCollections', @ unless err?
@@ -76,19 +76,27 @@ exports.Model = class Model extends backbone.Model
         # TODO: account for removed children
         return if @storedCollections.length is 0
 
-        console.log "Saving children for #{do @toString}"
+        @log.info "Saving collections"
 
         async.each @storedCollections,
             (collection, cb) =>
+                success = 0
                 async.each @[collection].toArray(),
-                    (model, cb2) ->
-                        model.save
-                            success: ->
+                    (model, cb2) =>
+                        model.save null,
+                            success: =>
+                                @log.silly "Saved %j", model
+                                success += 1
                                 do cb2
                             error: (err) ->
                                 cb2 err
-                    (err) -> cb err
-            (err) -> callback? err
+                    (err) =>
+                        @log.notice "Saved %d of %d %s", success,
+                            @[collection].length, collection
+                        cb err
+            (err) =>
+                @log.debug "Finished saving collections"
+                callback? err
 
     # Recursive cloning
     cloneVirtual: (newId) ->

@@ -6,7 +6,7 @@ util = require 'util'
 
 class InterpreterPlugin extends EventEmitter
     constructor: (@options, @imports) ->
-        @log = @imports.log
+        @log = new @imports.log.Logger => @constructor.name
         @debug = @options.debug ? false
         @imports.model.register "command", Command, CommandCollection
         @commands = new CommandCollection @imports.world
@@ -15,19 +15,19 @@ class InterpreterPlugin extends EventEmitter
         @register @commands
 
     register: (provider) ->
-        @log.info "interpreter: Registering provider #{provider.toString()}"
+        @log.info "Registering provider #{provider.toString()}"
         @providers.push provider
         provider.on 'updateCommands', => @updateCommands()
         @updateCommands()
 
     doCommand: (context, commandStr, callback) ->
-        @log.debug "interpreter.doCommand: '#{commandStr}', #{util.inspect context, depth:1}" if @debug
+        @log.silly "doCommand: '#{commandStr}', #{util.inspect context, depth:1}" if @debug
         [verb, args...] = commandStr.split /\s+/
         if not verb? or verb is ""
             return callback null, false
 
         provider = @reverseCache[verb]?.provider
-        @log.debug "interpreter.doCommand: Using provider #{provider}" if @debug
+        @log.debug "doCommand: Using provider #{provider}" if @debug
         if not provider?
             context.mob.print "I don't know how to #{verb}."
             # TODO: Continue here
@@ -36,7 +36,7 @@ class InterpreterPlugin extends EventEmitter
         provider.doCommand context, commandStr, callback
 
     readlineCompleter: (context, line, callback) ->
-        @log.debug "interpreter.readlineCompleter: '#{line}', #{util.inspect context, depth:1}" if @debug
+        @log.silly "readlineCompleter: '#{line}', #{util.inspect context, depth:1}" if @debug
         [verb, args...] = line.split /\s+/
         hits = []
         verbs = @verbsForMob context.mob
@@ -72,14 +72,17 @@ class InterpreterPlugin extends EventEmitter
     ###
     updateCommands: ->
         commands = []
+        @log.debug "updateCommands called"
         for provider in @providers
             for command in provider.getCommands()
+                @log.silly "updateCommands: command '%s' ('%s'), category: '%s',
+                    acl: '%s'", command.verb, command.aliases, command.category,
+                    command.acl
                 command.provider = provider
                 commands.push command
 
-        @log.debug "getCommand responses: #{util.inspect commands}" if @debug
         @commandCache = _.flatten commands
-        @log.debug "New command cache: #{util.inspect @commandCache, depth: 2}" if @debug
+        @log.silly "New command cache: #{util.inspect @commandCache, depth: 2}" if @debug
 
         @reverseCache = {}
         for command in @commandCache

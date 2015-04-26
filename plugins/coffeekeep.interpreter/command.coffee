@@ -54,12 +54,19 @@ exports.Command = class Command extends Model
         if completer.length < 3
             try
                 result = completer context, request
-                console.log util.inspect result
+                @log.silly "readlineCompleter: response: %j", result
             catch error
                 return callback error
             callback null, result
         else
-            completer context, request, callback
+            completer context, request, (err, result...) =>
+                if err?
+                    @log.error "readlineCompleter: async response error: %j, %j",
+                        err, result, err
+                else
+                    @log.silly "readlineCompleter: async response: %j", result
+
+                callback err, result...
 
     parseCommand: (context, commandStr) ->
         [verb, args...] = splitFull commandStr
@@ -90,14 +97,14 @@ exports.CommandCollection = class CommandCollection extends Collection
             cb = imports
             imports = {}
 
-        console.log "Loading commands from #{dirName}"
+        @log.info "Loading commands from #{dirName}"
 
         success = 0
         fail = 0
         files = fs.readdirSync dirName
         for file in files
             if file[-3..] != '.js' and file[-7..] != '.coffee'
-                console.log "Skipping non-command file #{file}"
+                @log.debug "Skipping non-command file #{file}"
                 continue
 
             fileName = path.join dirName, file
@@ -107,9 +114,9 @@ exports.CommandCollection = class CommandCollection extends Collection
             else
                 fail += 1
 
-        console.log "Successfully loaded #{success} out of #{success+fail} commands"
+        @log.info "Successfully loaded #{success} out of #{success+fail} commands"
         if fail > 0
-            console.error "WARNING: Not all commands loaded successfully. Check configuration."
+            @log.error "WARNING: Not all commands loaded successfully. Check configuration."
 
         do @updateValidCommands
         @emit 'updateCommands'
@@ -130,6 +137,7 @@ exports.CommandCollection = class CommandCollection extends Collection
                             id = path.resolve __dirname, '..', id
                         require id
 
+            @log.debug "Evaluating %s", path.basename filename
             command = coffee.eval fs.readFileSync(filename, 'utf8'), evalOptions
 
             unless command instanceof Command
@@ -138,7 +146,7 @@ exports.CommandCollection = class CommandCollection extends Collection
             oldCommand = @get command.get 'name'
             if oldCommand?
                 if not reload
-                    console.error "WARNING: Command '#{command.get 'name'}' already
+                    @log.error "WARNING: Command '#{command.get 'name'}' already
 exists from #{oldCommand.get 'fileName'}. Replacing."
                 oldCommand.set command.attributes
                 return true
@@ -148,8 +156,7 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
             @add command
             return true
         catch error
-            console.error "Error while loading commands from #{base}: #{error.toString()}"
-            console.error error.stack
+            @log.error "Error while loading commands from #{base}: #{error.toString()}", error
             return false
 
     getCommand: (context, verb) ->
@@ -166,7 +173,7 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
 
                 verb in aliases
             if models.length > 1
-                console.error "WARNING: Multiple commands found for alias '#{verb}'"
+                @log.error "WARNING: Multiple commands found for alias '#{verb}'"
 
             return models[0]
 
@@ -190,7 +197,7 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
         commandModel.doCommand context, commandStr, callback
 
     updateValidCommands: ->
-        console.log "Updating valid commands"
+        @log.info "Updating valid commands"
         commands = @pluck 'name'
         aliases = []
         @commandMasks = {}

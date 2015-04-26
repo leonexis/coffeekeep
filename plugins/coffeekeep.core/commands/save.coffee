@@ -13,6 +13,7 @@ new Command
 
         printStatus = (status) =>
             mob.print "\x1b[1A\x1b[2K#{status}"
+            @log.silly status
 
         updateProgress = (task, total, action) =>
             printStatus "Area save: [#{task}/#{total}] #{action}"
@@ -27,7 +28,7 @@ new Command
                         do callback
                     error: (err) ->
                         mob.print "An error occured, see console."
-                        console.log "Error during save: #{err}"
+                        @log.error "Error during save:", err
                         callback err
             when 'areas'
                 mob.print "Saving all areas..."
@@ -41,12 +42,13 @@ new Command
                             cb null
                         error: (err) ->
                             mob.print "An error occured saving area #{area.id}."
-                            console.log "Error while saving #{area.id}: #{err}, #{err.stack}"
+                            @log.error "Error while saving %s:", area.id, err
                             cb err
                 async.parallel callbacks, (err) ->
                     if (err)
                         mob.print "An error occured while saving areas."
-                        return console.log "An error occured while saving areas: #{err.stack}"
+                        @log.error "An error occured while saving areas.", err
+                        return
                     callback null
 
             when 'world'
@@ -58,7 +60,7 @@ new Command
                         do callback
                     error: (err) ->
                         mob.print "An error occured, see console."
-                        console.log "Error during save: #{err}"
+                        @log.error "Error during save:", err
                         callback err
             else
                 mob.print "Invalid resource."

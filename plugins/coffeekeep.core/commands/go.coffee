@@ -43,8 +43,8 @@ new Command
 
         newRoom = world.getLocationById link.room, area
         if not newRoom?
-            console.error "Link to room does not exist.
-#{room.getLocationId()}->#{direction}: #{link.room}"
+            @log.error "Link to room does not exist.
+                #{room.getLocationId()}->#{direction}: #{link.room}"
             mob.print "A dark energy prevents you from going that way."
             return
 

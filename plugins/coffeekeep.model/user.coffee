@@ -24,7 +24,7 @@ exports.User = class User extends Mob
 
         if (insecurePlaintext)
             @set 'password', "cleartext:#{password}"
-            console.log("ALERT: Using insecure cleartext password. Consider enabling hash storage.")
+            @log.warn "ALERT: Using insecure cleartext password. Consider enabling hash storage."
         else
             passtohash = password
             salt = ""
@@ -61,10 +61,10 @@ exports.UserCollection = class UserCollection extends MobCollection
         # sysop
         if @length is 0
             if attributes instanceof User
-                console.log "We have our first user! Making #{attributes.get 'name'} a sysop"
+                @log.notice "We have our first user! Making #{attributes.get 'name'} a sysop"
                 attributes.set 'sysop', true
             else
-                console.log "We have our first user! Making #{attributes.name} a sysop"
+                @log.notice "We have our first user! Making #{attributes.name} a sysop"
                 attributes.sysop = true
             # TODO: notify the user somehow?
 
