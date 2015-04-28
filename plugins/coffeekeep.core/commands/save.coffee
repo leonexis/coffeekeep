@@ -9,9 +9,9 @@ new Command
     {verb, args} = request
     if args.length < 1
       mob.print "Which resource?"
-      return do callback
+      return process.nextTick callback
 
-    printStatus = (status) =>
+    printStatus = (status) ->
       mob.print "\x1b[1A\x1b[2K#{status}"
       log.silly status
 
@@ -64,4 +64,4 @@ new Command
             callback err
       else
         mob.print "Invalid resource."
-        return do callback
+        return process.nextTick callback

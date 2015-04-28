@@ -34,6 +34,10 @@ exports.Model = class Model extends backbone.Model
       return unless @ is model
       @debug "@on 'sync' (%j, %j, %j)", model, collection, options
       @lastSync = do Date.now
+      # FIXME: saveCollections is occuring in the background. As soon as this
+      # object is saved, the success callback is called even if there are
+      # collections to be saved. This leads to issues like the 'save' command
+      # returning before an area's sub-objects are actually saved.
       do @saveCollections if options.recursive
 
     #@on 'all', (id, model, collections, options) =>
@@ -75,11 +79,12 @@ exports.Model = class Model extends backbone.Model
 
   saveCollections: (callback) ->
     # TODO: account for removed children
-    return if @storedCollections.length is 0
+    if @storedCollections.length is 0
+      return process.nextTick callback
 
     @log.info "Saving collections"
 
-    async.each @storedCollections,
+    async.eachSeries @storedCollections,
       (collection, cb) =>
         success = 0
         async.each @[collection].toArray(),
@@ -91,11 +96,21 @@ exports.Model = class Model extends backbone.Model
                 do cb2
               error: (err) ->
                 cb2 err
+
           (err) =>
+            if err?
+              @log.error "Error while saving %s: %s", collection, err, err.stack
+              return cb err
+
             @log.notice "Saved %d of %d %s", success,
               @[collection].length, collection
             cb err
+
       (err) =>
+        if err?
+          @log.error "Error while saving collections: %s", err, err.stack
+          return callback? err
+
         @log.debug "Finished saving collections"
         callback? err
 

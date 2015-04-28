@@ -135,6 +135,8 @@ exports.CommandCollection = class CommandCollection extends Collection
           log: new @log.constructor modulename
           imports: imports
           Command: Command
+          process:
+            nextTick: process.nextTick
           require: (id) ->
             if id.indexOf('.') == 0
               id = path.resolve __dirname, '..', id
