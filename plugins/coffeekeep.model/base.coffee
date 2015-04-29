@@ -4,6 +4,8 @@ async = require 'async'
 _ = require 'underscore'
 debug = require 'debug'
 
+UNSPECIFIED = new Object
+
 exports.Model = class Model extends backbone.Model
   _debug: debug 'coffeekeep.model:base.Model'
   debug: (args...) ->
@@ -164,13 +166,78 @@ exports.Model = class Model extends backbone.Model
     @attributes = _.defaults @attributes, @virtual.attributes
 
   # Look up our own info. If we are virtual, continue search to there
-  get: (attr) ->
+  get: (attr, dflt) ->
     value = @attributes[attr]
     if not value? and @virtual?
       value = @virtual.attributes[attr]
+    if not value?
+      value = dflt
     value
 
   emit: (args...) -> @trigger args...
+
+  save: (args...) ->
+    # Prefer new style of .save [options], cb
+    opts = {}
+    cb = -> null
+    if args.length is 2 and _(args[1]).isFunction()
+      [opts, cb] = args
+    else if args.length is 1 and _(args[0]).isFunction()
+      [cb] = args
+    else if args.length isnt 0
+      err = new Error "Deprecated use of save"
+      @log.notice "Deprecated use of save", err, err.stack
+      return super args...
+
+    callopts =
+      success: =>
+        cb null, @, opts
+        @emit 'save', @, opts
+      error: (model, response, options) => cb response, @, opts
+
+    super null, _.extend callopts, opts
+
+  fetch: (args...) ->
+    # Prefer new style of .fetch [options], cb
+    opts = {}
+    cb = -> null
+    if args.length is 2 and _(args[1]).isFunction()
+      [opts, cb] = args
+    else if args.length is 1 and _(args[0]).isFunction()
+      [cb] = args
+    else if args.length isnt 0
+      err = new Error "Deprecated use of fetch"
+      @log.notice "Deprecated use of fetch", err, err.stack
+      return super args...
+
+    callopts =
+      success: =>
+        cb null, @, opts
+        @emit 'fetch', @, opts
+      error: (model, response, options) => cb response, @, opts
+
+    super _.extend callopts, opts
+
+  destroy: (args...) ->
+    # Prefer new style of .destroy [options], cb
+    opts = {}
+    cb = -> null
+    if args.length is 2 and _(args[1]).isFunction()
+      [opts, cb] = args
+    else if args.length is 1 and _(args[0]).isFunction()
+      [cb] = args
+    else if args.length isnt 0
+      err = new Error "Deprecated use of destroy"
+      @log.notice "Deprecated use of destroy", err, err.stack
+      return super args...
+
+    callopts =
+      success: =>
+        @emit 'destroy', @, opts
+        cb null, @, opts
+      error: (model, response, options) => cb response @, opts
+
+    super _.extend callopts, opts
 
 exports.Collection = class Collection extends backbone.Collection
   _debug: debug 'coffeekeep.model:base.Model'
