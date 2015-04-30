@@ -29,18 +29,10 @@ exports.Model = class Model extends backbone.Model
         @debug "@on 'add': option.merge, setting @lastSync"
         @lastSync = do Date.now
 
-      # If we were loaded from the db, then load our collections
-      do @loadCollections unless do @isNew
-
     @on 'sync', (model, collection, options) =>
       return unless @ is model
       @debug "@on 'sync' (%j, %j, %j)", model, collection, options
       @lastSync = do Date.now
-      # FIXME: saveCollections is occuring in the background. As soon as this
-      # object is saved, the success callback is called even if there are
-      # collections to be saved. This leads to issues like the 'save' command
-      # returning before an area's sub-objects are actually saved.
-      do @saveCollections if options.recursive
 
     #@on 'all', (id, model, collections, options) =>
     #  return unless @ is model
@@ -61,25 +53,28 @@ exports.Model = class Model extends backbone.Model
     containerUrl = _.result @collection, 'url'
     containerUrl + @id
 
-  loadCollections: (callback) ->
-    return if @storedCollections.length is 0
+  loadCollections: (opts={}, callback) ->
+    if @storedCollections.length is 0
+      return process.nextTick callback
+
     @log.info "Loading my children"
 
     async.each @storedCollections,
       (collection, cb) =>
-        @[collection].fetch
-          success: =>
-            @log.notice "Loaded %d %s", @[collection].length, collection
-            @emit 'loadedCollection', @[collection], @
-            do cb
-          error: (err) =>
-            @log.error "Error while fetching collections:", err
-            cb err
+        @[collection].fetch opts, (err, model, opts) =>
+          if err?
+            @log.err "Error while fetching collections:", err, err.stack
+            return cb err
+
+          @log.notice "Loaded %d %s", @[collection].length, collection
+          @emit 'loadedCollection', @[collection], @
+          cb null
+
       (err) =>
         @emit 'loadedCollections', @ unless err?
         callback? err
 
-  saveCollections: (callback) ->
+  saveCollections: (opts={}, callback) ->
     # TODO: account for removed children
     if @storedCollections.length is 0
       return process.nextTick callback
@@ -91,13 +86,11 @@ exports.Model = class Model extends backbone.Model
         success = 0
         async.each @[collection].toArray(),
           (model, cb2) =>
-            model.save null,
-              success: =>
-                @log.silly "Saved %j", model
-                success += 1
-                do cb2
-              error: (err) ->
-                cb2 err
+            model.save opts, (err) =>
+              return cb2 err if err?
+              @log.silly "Saved %j", model
+              success += 1
+              cb2 null
 
           (err) =>
             if err?
@@ -195,6 +188,13 @@ exports.Model = class Model extends backbone.Model
         @emit 'save', @, opts
       error: (model, response, options) => cb response, @, opts
 
+    if opts.recursive
+      _success = callopts.success
+      callopts.success = =>
+        @saveCollections opts, (err) =>
+          return callopts.error @, err, opts if err?
+          do _success
+
     super null, _.extend callopts, opts
 
   fetch: (args...) ->
@@ -215,6 +215,13 @@ exports.Model = class Model extends backbone.Model
         cb null, @, opts
         @emit 'fetch', @, opts
       error: (model, response, options) => cb response, @, opts
+
+    if opts.recursive
+      _success = callopts.success
+      callopts.success = =>
+        @loadCollections opts, (err) =>
+          return callopts.error @, err, opts if err?
+          do _success
 
     super _.extend callopts, opts
 
@@ -289,3 +296,34 @@ exports.Collection = class Collection extends backbone.Collection
     @parent = null
 
   emit: (args...) -> @trigger args...
+
+  fetch: (args...) ->
+    # Prefer new style of .fetch [options], cb
+    opts = {}
+    cb = -> null
+    if args.length is 2 and _(args[1]).isFunction()
+      [opts, cb] = args
+    else if args.length is 1 and _(args[0]).isFunction()
+      [cb] = args
+    else if args.length isnt 0
+      err = new Error "Deprecated use of fetch"
+      @log.notice "Deprecated use of fetch", err, err.stack
+      return super args...
+
+    callopts =
+      success: =>
+        cb null, @, opts
+        @emit 'fetch', @, opts
+      error: (collection, response, options) => cb response, @, opts
+
+    if opts.recursive
+      _success = callopts.success
+      callopts.success = =>
+        async.forEach @models,
+          (model, cb) ->
+            model.loadCollections opts, cb
+          (err) =>
+            return callopts.error @, err, opts if err?
+            do _success
+
+    super _.extend callopts, opts

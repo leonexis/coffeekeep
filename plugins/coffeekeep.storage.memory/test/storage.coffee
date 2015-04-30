@@ -25,11 +25,7 @@ describe 'coffeekeep.storage.memory', ->
       world = app.getService 'world'
 
     it 'should support saving', (done) ->
-      world.save null,
-        success: (model, response, options) ->
-          done null
-        error: (model, response, options) ->
-          done response
+      world.save done
 
   describe 'sync', ->
     sync = null

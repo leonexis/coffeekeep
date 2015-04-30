@@ -8,6 +8,7 @@ debug = require 'debug'
 
 exports.World = class World extends Model
   debug: debug 'coffeekeep.model:World'
+  storedCollections: ['areas', 'users']
   url: '/world'
   defaults:
     startLocation: "default#start"
@@ -20,34 +21,12 @@ exports.World = class World extends Model
     @world = @
 
   startup: (cb) ->
-    @loadCollections cb
-
-  loadCollections: (callback) ->
-    async.parallel [
-      (cb) =>
-        @users.fetch
-          success: =>
-            @log.info "Loaded %d users", @users.length
-            do cb
-          error: (err) ->
-            cb err
-      (cb) =>
-        @areas.fetch
-          success: =>
-            @log.info "Loaded %d areas", @areas.length
-            do cb
-          error: (err) ->
-            cb err
-    ], (err) =>
-      if err
-        @log.error "Error while loading collections", err
-        return callback err
-
-      @log.info "loadCollections complete"
+    @loadCollections recursive: true, (err) =>
+      return cb err if err?
       if @areas.length is 0
         @log.info "There are no areas loaded. Let me make one for you."
-        return @createStarterArea callback
-      do callback
+        return @createStarterArea cb
+      do cb
 
   createStarterArea: (callback) ->
     @log.info "Creating a new area"

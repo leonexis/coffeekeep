@@ -34,7 +34,8 @@ module.exports = (options, imports, register) ->
   model.register 'world', World, WorldCollection
 
   world = new model.models.world()
-  startup = ->
+  startup = (err) ->
+    return register err if err?
     debug 'Starting up world'
     world.startup (err) ->
       return register err if err?
@@ -42,13 +43,15 @@ module.exports = (options, imports, register) ->
         model: model
         world: world
 
-  world.fetch
-    error: (model, err, options) ->
-      debug 'Error while fetching world: %s %j', err, err
+  world.fetch (err) ->
+    if err?
       if err instanceof storage.NotFoundError
-        debug 'Got %s when trying to fetch world, creating a new one'
-        return startup()
+        world.log.warn "Got %s when trying to fetch world, creating a new one",
+          err, err.stack
+        return startup null
+      else
+        world.log.error "Could not fetch world:", err.stack
+        return startup err
 
-      log.error "Could not fetch world: #{err.stack}"
-      register err
-    success: startup
+    world.log.info "Starting world"
+    startup null

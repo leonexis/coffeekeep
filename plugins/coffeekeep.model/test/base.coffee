@@ -64,13 +64,11 @@ describe 'coffeekeep.model:base', ->
           foo.save cb
 
         (_model, _options, cb) ->
-          console.log "saved, fetching", _model, _options, cb
           bar = new model.models.base
           bar.url = -> '/tests/foo2'
           bar.fetch cb
 
         (_model, _options, cb) ->
-          console.log "fetched"
           bar.get('foo').should.eql 'bar'
           _model.should.eql bar
           cb null
@@ -187,8 +185,108 @@ describe 'coffeekeep.model:base', ->
           cb null
       ], done
 
-    it 'should support model virtualization'
+    it 'should support model virtualization', (done) ->
+      foo = new model.models.base
+        foo: 'bar'
+        bar: 'baz'
+      foo.url = -> '/tests/foo9'
+
+      # Create the virtual object
+      virt1 = foo.cloneVirtual()
+      virt1.get('foo').should.eql 'bar'
+      virt1.set 'foo', 'baz'
+      virt1.get('foo').should.eql 'baz'
+
+      # Change property on original
+      foo.get('foo').should.eql 'bar'
+      foo.set 'bar', 'foo'
+
+      # And make sure it is reflected
+      virt1.get('bar').should.eql 'foo'
+
+      # Make it a real object
+      virt1.makeReal()
+
+      foo.set 'bar', 'bar'
+      virt1.get('bar').should.eql 'foo'
+      done null
+
   describe 'Collection', ->
-    it 'should save its children'
-    it 'should automatically save when the parent is saved recursively'
-    it 'parent callback should only be called after collections save'
+    Root = null
+    root = null
+    Thing = null
+    ThingCollection = null
+    Widget = null
+    WidgetCollection = null
+
+    before (done) ->
+      Widget = class Widget extends model.models.base
+
+      WidgetCollection = class WidgetCollection extends model.collections.base
+        model: Widget
+        urlPart: 'widgets'
+
+      Thing = class Thing extends model.models.base
+        storedCollections: ['widgets']
+        initialize: ->
+          @widgets = new WidgetCollection @
+
+      ThingCollection = class ThingCollection extends model.collections.base
+        model: Thing
+        urlPart: 'things'
+
+      Root = class Root extends model.models.base
+        url: '/root'
+        storedCollections: ['things']
+        initialize: ->
+          @things = new ThingCollection @
+
+      done null
+
+    it 'should save/load its children', (done) ->
+      root = new Root
+        one: 'one'
+      thing1 = new Thing
+        id: 'thing1'
+        two: 'two'
+      thing2 = new Thing
+        id: 'thing2'
+        three: 'three'
+      widget1 = new Widget
+        id: 'widget1'
+        four: 'four'
+
+      root.things.add thing1
+      root.things.add thing2
+      thing2.widgets.add widget1
+
+      root.isNew().should.be.true
+      thing1.isNew().should.be.true
+      thing2.isNew().should.be.true
+      widget1.isNew().should.be.true
+
+      root2 = null
+
+      async.waterfall [
+        (cb) ->
+          root.save recursive: true, cb
+        (model, options, cb) ->
+          root.isNew().should.be.false
+          thing1.isNew().should.be.false
+          thing2.isNew().should.be.false
+          widget1.isNew().should.be.false
+          root2 = new Root
+          root2.fetch recursive: true, cb
+        (model, options, cb) ->
+          model.should.eql.root2
+          root2.get('one').should.eql 'one'
+          root2.things.length.should.eql 2
+          root2.things.get('thing1').get('two').should.eql 'two'
+          root2.things.get('thing2').get('three').should.eql 'three'
+          root2.things.get('thing2').widgets.get('widget1').get('four')
+            .should.eql 'four'
+          cb null
+      ], done
+
+    it 'parent should not be destroyable if it has children'
+    it 'should allow destroying all children'
