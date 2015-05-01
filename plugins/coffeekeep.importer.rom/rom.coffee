@@ -24,7 +24,7 @@ class ROMReader extends events.EventEmitter
     data
 
   getLine: ->
-    [@line, @lines...] = @lines
+    @line = @lines[@lineIndex]
     @lineIndex += 1
     @log?.silly "Parsing line %d/%d: %j", @lineIndex, @linesTotal, @line
     if not @line?
@@ -47,8 +47,7 @@ class ROMReader extends events.EventEmitter
     @lineIndex = 0
     @lines = data.split '\n'
     @linesTotal = @lines.length
-    #while @lines.length > 0
-    async.whilst (=>@lines.length),
+    async.whilst (=>@lineIndex < @linesTotal),
       (cb) =>
         @getLine()
         if not @line or @line.indexOf("#") != 0
