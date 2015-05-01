@@ -26,6 +26,8 @@ describe 'coffeekeep.model:base', ->
     app.destroy()
 
   describe 'Model', ->
+    beforeEach -> storage._reset()
+
     it 'should allow setting and retreiving attributes', ->
       foo = new model.models.base
       foo.set 'bar', 'baz'
@@ -211,6 +213,44 @@ describe 'coffeekeep.model:base', ->
       virt1.get('bar').should.eql 'foo'
       done null
 
+    it 'should update on second save', (done) ->
+      foo = new model.models.base
+        foo: 'bar'
+      foo.url = '/tests/foo10'
+
+      foo2 = new model.models.base
+      foo2.url = '/tests/foo10'
+
+      async.waterfall [
+        (cb) ->
+          foo.save cb
+        (_model, _options, cb) ->
+          storage._history.getLast().should.have.properties
+            method: 'create'
+            url: '/tests/foo10'
+
+          foo.set 'foo', 'baz'
+          foo.save cb
+
+        (_model, _options, cb) ->
+          storage._history.getLast().should.have.properties
+            method: 'update'
+            url: '/tests/foo10'
+
+          foo2.fetch cb
+
+        (_model, _options, cb) ->
+          foo2.get('foo').should.eql 'baz'
+          foo2.set 'foo', 'bar'
+          foo2.save cb
+
+        (_model, _options, cb) ->
+          storage._history.getLast().should.have.properties
+            method: 'update'
+            url: '/tests/foo10'
+          cb null
+      ], done
+
   describe 'Collection', ->
     Root = null
     root = null
@@ -242,6 +282,8 @@ describe 'coffeekeep.model:base', ->
           @things = new ThingCollection @
 
       done null
+
+    beforeEach -> storage._reset()
 
     it 'should save/load its children', (done) ->
       root = new Root
@@ -286,6 +328,59 @@ describe 'coffeekeep.model:base', ->
           root2.things.get('thing2').widgets.get('widget1').get('four')
             .should.eql 'four'
           cb null
+      ], done
+
+    it 'should update on second save', (done) ->
+      root = new Root
+        one: 'one'
+      thing1 = new Thing
+        id: 'thing1'
+        two: 'two'
+      thing2 = new Thing
+        id: 'thing2'
+        three: 'three'
+      widget1 = new Widget
+        id: 'widget1'
+        four: 'four'
+
+      root.things.add thing1
+      root.things.add thing2
+      thing2.widgets.add widget1
+
+      root2 = new Root
+
+      async.waterfall [
+        (cb) ->
+          root.save recursive: true, cb
+
+        (model, options, cb) ->
+          root.save cb
+
+        (model, options, cb) ->
+          storage._history.getLast().should.have.properties
+            url: '/root'
+            method: 'update'
+
+          thing1.save cb
+
+        (model, options, cb) ->
+          storage._history.getLast().should.have.properties
+            url: '/root/things/thing1'
+            method: 'update'
+
+          root2.fetch recursive:true, cb
+
+        (model, options, cb) ->
+          root2.things.get('thing1').set 'two', 'foo'
+          root2.things.get('thing1').save cb
+
+        (model, options, cb) ->
+          storage._history.getLast().should.have.properties
+            url: '/root/things/thing1'
+            method: 'update'
+
+          cb null
+
       ], done
 
     it 'parent should not be destroyable if it has children'

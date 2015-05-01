@@ -18,50 +18,45 @@ new Command
     updateProgress = (task, total, action) ->
       printStatus "Area save: [#{task}/#{total}] #{action}"
 
+    saveArea = (area, cb) ->
+      printStatus "Saving area #{area.id}"
+      area.save recursive: true, (err) ->
+        if err?
+          mob.print "An error occured, see console."
+          log.error "Error during save:", err, err.stack
+          return cb err
+        printStatus "Area #{area.id} saved."
+        mob.print ''
+        cb null
+
     switch args[0]
       when 'area'
-        mob.print "Saving area..."
-        area.save null,
-          recursive: true
-          success: ->
-            mob.print "Area saved."
-            do callback
-          error: (err) ->
-            mob.print "An error occured, see console."
-            log.error "Error during save:", err
-            callback err
+        mob.print ''
+        saveArea area, callback
+
       when 'areas'
+        tasks = world.areas.map (area) -> (cb) -> saveArea area, cb
+
         mob.print "Saving all areas..."
-        callbacks = world.areas.map (area) -> (cb) ->
-          printStatus "Saving area #{area.id}"
-          area.save null,
-            recursive: true
-            success: ->
-              printStatus "Area #{area.id} saved."
-              mob.print ''
-              cb null
-            error: (err) ->
-              mob.print "An error occured saving area #{area.id}."
-              log.error "Error while saving %s:", area.id, err
-              cb err
-        async.parallel callbacks, (err) ->
+        mob.print ''
+        async.series tasks, (err) ->
           if (err)
             mob.print "An error occured while saving areas."
-            log.error "An error occured while saving areas.", err
-            return
+            log.error "An error occured while saving areas.", err, err.stack
+            return callback err
           callback null
 
       when 'world'
         mob.print "Saving world config..."
-        world.save null,
-          recursive: false
-          success: ->
-            mob.print "World config saved."
-            do callback
-          error: (err) ->
+        world.save recursive:false, (err) ->
+          if err?
             mob.print "An error occured, see console."
             log.error "Error during save:", err
-            callback err
+            return callback err
+
+          mob.print "World config saved."
+          callback null
+
       else
         mob.print "Invalid resource."
         return process.nextTick callback

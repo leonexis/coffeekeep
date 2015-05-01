@@ -16,7 +16,25 @@ class NotFoundError extends StorageError
 class ExistsError extends StorageError
   constructor: -> super
 
-getSync = (log, db) -> (method, model, options) ->
+class SyncHistory
+  constructor: (@maxLength) ->
+    @history = []
+
+  add: (obj) ->
+    @history.push obj
+    @history.shift() while @history.length > @maxLength
+    @length = @history.length
+
+  get: (index) ->
+    # Index should be a negative number..
+    if index < 0
+      index += @history.length
+
+    @history[index]
+
+  getLast: -> @get -1
+
+getSync = (log, db, history) -> (method, model, options) ->
   options ?= {}
 
   url = _.result model, 'url'
@@ -25,6 +43,12 @@ getSync = (log, db) -> (method, model, options) ->
     "sync: %s: %s, %j, %j", url, method, model, options
 
   debug "sync: %s: %s, %j, %j", url, method, model, options
+
+  history.add
+    url: url
+    method: method
+    model: model? and JSON.stringify model.attributes
+    options: options
 
   if not url?
     throw new Error "Could not get url for this model #{util.inspect model}"
@@ -94,11 +118,14 @@ module.exports = (options, imports, register) ->
     verbose: false
 
   db = {}
+  history = new SyncHistory 100
 
   register null,
     storage:
       StorageError: StorageError
       NotFoundError: NotFoundError
       ExistsError: ExistsError
-      sync: getSync imports.log, db
+      sync: getSync imports.log, db, history
       _db: db
+      _history: history
+      _reset: -> _.chain(db).keys().map((key) -> delete db[key])
