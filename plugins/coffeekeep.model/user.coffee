@@ -17,7 +17,8 @@ exports.User = class User extends Mob
     # Set hashalgo to preferred hash algorithm. Algorithm names are the same as
     # output by "openssl list-message-digest-algorithms". When in doubt, the
     # default "whirlpool" algorithm is a good choice. If whirlpool is not
-    # supported, use "sha512" hashalgo = 'whirlpool'
+    # supported, use "sha512"
+    hashalgo = 'whirlpool'
 
     # Setting insecurePlaintext to 1 will result in passwords being stored in
     # plaintext. This is VERY insecure and should not be enabled unless openssl
