@@ -95,6 +95,7 @@ class ROMReader extends events.EventEmitter
       (err) =>
         return cb err if err?
         @emit 'done'
+        cb null
 
   getArea: ->
     current = {}

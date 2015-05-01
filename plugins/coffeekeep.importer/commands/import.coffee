@@ -7,7 +7,7 @@ new Command
   description: "Imports an area from a file."
   help: "Usage: import <file>"
   consumes: ['importer', 'model']
-  action: (context, request) ->
+  action: (context, request, callback) ->
     {mob, room, world, area} = context
     {verb, args} = request
     {importer, model} = imports
@@ -100,4 +100,4 @@ new Command
       printStatus "Done importing #{stats.area} areas, #{stats.room} rooms,
         #{stats.mob} mobs, #{stats.item} items"
 
-    importer.read()
+    importer.read callback
