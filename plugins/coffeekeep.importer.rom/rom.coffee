@@ -1,6 +1,7 @@
 readers = require './'
 fs = require 'fs'
 events = require 'events'
+async = require 'async'
 
 class ROMReader extends events.EventEmitter
   debug: false
@@ -37,7 +38,8 @@ class ROMReader extends events.EventEmitter
     text = text.replace /\s{2,}/g, ' '
     text.split ' '
 
-  read: ->
+  read: (cb) ->
+    cb ?= -> null
     data = @data
     state = null
     current = null
@@ -45,49 +47,54 @@ class ROMReader extends events.EventEmitter
     @lineIndex = 0
     @lines = data.split '\n'
     @linesTotal = @lines.length
-    while @lines.length > 0
-      @getLine()
-      if not @line or @line.indexOf("#") != 0
-        # Eat everything up until the next section
-        continue
+    #while @lines.length > 0
+    async.whilst (=>@lines.length),
+      (cb) =>
+        @getLine()
+        if not @line or @line.indexOf("#") != 0
+          # Eat everything up until the next section
+          return setImmediate cb
 
-      @log?.debug "Found marker %s", @line
-      @index = Number @line[1..]
+        @log?.debug "Found marker %s", @line
+        @index = Number @line[1..]
 
-      if not @index? or Number.isNaN @index
-        state = @line[1..].toLowerCase()
-        @log?.silly "Marker is a new section %s (%j)", state, @line
-        if state in ['mobiles', 'rooms', 'objects']
-          # These require restarting to find new index
-          continue
-      else
-        @log?.silly "Marker is new index %d", @index
-        if @index == 0
-          @log?.silly "End of section found, skipping"
-          continue
+        if not @index? or Number.isNaN @index
+          state = @line[1..].toLowerCase()
+          @log?.silly "Marker is a new section %s (%j)", state, @line
+          if state in ['mobiles', 'rooms', 'objects']
+            # These require restarting to find new index
+            return setImmediate cb
+        else
+          @log?.silly "Marker is new index %d", @index
+          if @index == 0
+            @log?.silly "End of section found, skipping"
+            return setImmediate cb
 
-      switch state
-        when 'area'
-          current = @getArea()
-        when 'rooms'
-          current = @getRoom()
-        when 'mobiles'
-          current = @getMobile()
-        when 'objects'
-          current = @getObject()
+        switch state
+          when 'area'
+            current = @getArea()
+          when 'rooms'
+            current = @getRoom()
+          when 'mobiles'
+            current = @getMobile()
+          when 'objects'
+            current = @getObject()
 
-      if state? and current?
-        emitState = switch state
-          when 'rooms' then 'room'
-          when 'mobiles' then 'mobile'
-          when 'objects' then 'item'
-          else state
-        @log?.debug "Emitting %s, %j", emitState, current
-        @emit emitState, current
+        if state? and current?
+          emitState = switch state
+            when 'rooms' then 'room'
+            when 'mobiles' then 'mobile'
+            when 'objects' then 'item'
+            else state
+          @log?.debug "Emitting %s, %j", emitState, current
+          @emit emitState, current
 
-      current = null
+        current = null
+        setImmediate cb
 
-    @emit 'done'
+      (err) =>
+        return cb err if err?
+        @emit 'done'
 
   getArea: ->
     current = {}
