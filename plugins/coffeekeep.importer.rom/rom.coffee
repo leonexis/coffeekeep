@@ -179,6 +179,8 @@ class ROMReader extends events.EventEmitter
      current.x_rom_size,
      current.x_rom_material] = @getList()
 
+    current
+
   getObject: ->
     current =
       id: @index.toString()
