@@ -20,6 +20,7 @@ module.exports = exports = [
         format: '{Name} OOC{s}, "{text}"'
       achat:
         format: '{Name} achat{s}, "{text}"'
+        acl: '-all +sysop'
       newbie:
         format: '{Name} newbie{s}, "{text}"'
 
