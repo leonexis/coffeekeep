@@ -22,6 +22,10 @@ new Command
 
     command = interpreter.getVerb verb
 
+    # Make sure mob has permission to run the command
+    if command.acl? and not mob.hasPermission command.acl
+      command = null
+
     if not command?
       mob.print "\r\nI don't know what that means, so I can't help you there.
         \r\n"

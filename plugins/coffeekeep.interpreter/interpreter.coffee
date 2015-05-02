@@ -26,12 +26,20 @@ class InterpreterPlugin extends EventEmitter
     if not verb? or verb is ""
       return callback null, false
 
-    provider = @reverseCache[verb]?.provider
-    @log.debug "doCommand: Using provider #{provider}" if @debug
-    if not provider?
-      context.mob.print "I don't know how to #{verb}."
-      # TODO: Continue here
+    cancel = ->
+      context.mob.print "I don't now how to #{verb}."
       return callback null, false
+
+    command = @reverseCache[verb]
+    provider = command?.provider
+    return cancel() if not provider?
+
+    @log.debug "doCommand: Using provider #{provider}" if @debug
+
+    # If ACL is present, then check against it, otherwise let the provider
+    # deal with it
+    if command.acl? and not context.mob.hasPermission command.acl
+      return cancel()
 
     provider.doCommand context, commandStr, callback
 
