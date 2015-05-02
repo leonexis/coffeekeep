@@ -205,7 +205,7 @@ module.exports = (options, imports, register) ->
     toString: -> "[Channel '#{@id}']"
 
     reMessage: /^(\S+)\s+(.*)$/
-    reList: /^(\S+)\s+list(\s+\d+)$/
+    reList: /^(\S+)\s+list(\s+\d+)?$/
 
     processMessage: (message) ->
       message = new Message message if message not instanceof Message
@@ -222,6 +222,9 @@ module.exports = (options, imports, register) ->
       for session in mud.sessions
         continue unless session.user?
         continue unless @isEnabled {mob:session.user}
+        acl = @get 'acl'
+        if acl? and acl isnt '+all'
+          continue unless session.user.hasPermission acl
         session.user.emit 'message', message
         session.user.print message.forObserver session.user
 
@@ -279,7 +282,7 @@ module.exports = (options, imports, register) ->
       if relst?
         [m, lines] = relst
         if lines?
-          lines = Number number
+          lines = Number lines
         else
           lines = @history.length
 
@@ -288,11 +291,15 @@ module.exports = (options, imports, register) ->
         for message in history
           mob.print "#{message.subject}> #{message.text}"
 
-        return cb null, true
+        return setImmediate -> cb null, true
+
+      unless @isEnabled context
+        mob.print "You can't send a message, you have this channel disabled!"
+        return setImmediate -> cb null, false
 
       if not remsg?
         mob.print "Must provide a message."
-        return cb null, false
+        return setImmediate -> cb null, false
 
       [m, verb, text] = remsg
 
@@ -303,7 +310,7 @@ module.exports = (options, imports, register) ->
         channel: @
 
       @processMessage message
-      cb null, true
+      setImmediate -> cb null, true
 
   class ChannelCollection extends model.collections.base
     model: Channel
@@ -335,10 +342,15 @@ module.exports = (options, imports, register) ->
         description: "Sends a message on the #{channel.id} channel"
         help: """
 Usage: #{channel.id} <message>
+       #{channel.id} list [# of lines]
        #{channel.id}
        no#{channel.id}
 
 With an argument, #{channel.id} sends a message on that channel.
+
+Calling with 'list' will list the history of the channel up to the number
+specified or the maximum history length if no number was specified.
+
 Using #{channel.id} or no#{channel.id} with no argument enables or disables
 receiving messages on that channel, respectively.
         """
@@ -363,9 +375,16 @@ receiving messages on that channel, respectively.
       if args.length is 0
         # Enable or disable channel
         if isDisabler
-          channel.disable context, cb
+          if channel.isEnabled context
+            mob.print "Channel #{channel.id} disabled."
+            return channel.disable context, cb
+          else
+            mob.print "Channel #{channel.id} was already disabled."
+            return setImmediate cb
         else
-          channel.enable context, cb
+          unless channel.isEnabled context
+            mob.print "Channel #{channel.id} enabled."
+            return channel.enable context, cb
 
       channel.doCommand context, commandStr, cb
 
