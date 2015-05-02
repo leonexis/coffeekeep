@@ -97,6 +97,9 @@ exports.CommandCollection = class CommandCollection extends Collection
       cb = imports
       imports = {}
 
+    if not cb?
+      cb = -> null
+
     @log.info "Loading commands from #{dirName}"
 
     success = 0
@@ -121,6 +124,7 @@ exports.CommandCollection = class CommandCollection extends Collection
 
     do @updateValidCommands
     @emit 'updateCommands'
+    cb null
 
   loadFile: (filename, imports={}, reload=false) ->
     # Load a command file that exports `exports.commands`
@@ -191,6 +195,8 @@ exists from #{oldCommand.get 'fileName'}. Replacing."
       aliases: command.get 'aliases'
       category: command.get 'category'
       acl: command.get 'acl'
+      help: command.get 'help'
+      description: command.get 'description'
 
   doCommand: (context, commandStr, callback) ->
     [verb, args...] = splitFull commandStr

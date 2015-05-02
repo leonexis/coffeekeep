@@ -16,8 +16,7 @@ module.exports = (options, imports, register) ->
   server = null
   async.series [
     (cb) ->
-      commands.loadDirectory __dirname + '/commands'
-      cb null
+      commands.loadDirectory __dirname + '/commands', imports, cb
     (cb) ->
       require('./app').setup options, imports, (err, app_) ->
         throw err if err?

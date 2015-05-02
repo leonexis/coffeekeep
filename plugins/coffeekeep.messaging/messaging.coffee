@@ -327,11 +327,21 @@ module.exports = (options, imports, register) ->
       interpreter.register @
 
     getCommands: ->
-      @map (channel) =>
+      @map (channel) ->
         verb: channel.id
         aliases: ['no'+channel.id]
         category: 'chat'
         acl: channel.get 'acl'
+        description: "Sends a message on the #{channel.id} channel"
+        help: """
+Usage: #{channel.id} <message>
+       #{channel.id}
+       no#{channel.id}
+
+With an argument, #{channel.id} sends a message on that channel.
+Using #{channel.id} or no#{channel.id} with no argument enables or disables
+receiving messages on that channel, respectively.
+        """
 
     processMessage: (message) ->
       if not message.channel?

@@ -108,6 +108,8 @@ class InterpreterPlugin extends EventEmitter
     @log.debug "verbsForMob %s: %j", mob.id, verbs
     verbs
 
+  getVerb: (verb) -> @reverseCache[verb]
+
 module.exports = (options, imports, register) ->
 
   interpreterPlugin = new InterpreterPlugin options, imports

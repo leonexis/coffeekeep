@@ -3,9 +3,11 @@ new Command
   aliases: []
   description: "Provides help on any command."
   help: "Usage: help [command]"
+  consumes: ['interpreter']
   action: (context, request) ->
     {mob, room, world, area} = context
     {verb, args} = request
+    {interpreter} = imports
     noncanonical = 0
 
     if verb is 'help'
@@ -16,33 +18,27 @@ new Command
       verb = args[0].toLowerCase()
       canonicalverb = verb
 
-    world.commands.forEach (command) ->
-      aliases = command.get 'aliases'
-      if aliases? and aliases.length > 0
-        for currentalias in aliases
-          if (verb == currentalias)
-            verb = command
-            noncanonical = 1
-
-
-    command = world.commands.get verb
+    command = interpreter.getVerb verb
 
     if not command?
       mob.print "\r\nI don't know what that means, so I can't help you there.
         \r\n"
       return
 
-    helpstring = command.get 'help'
-    description = command.get 'description'
+    if command.verb isnt verb
+      noncanonical = 1
+
+    helpstring = command.help
+    description = command.description
 
     if noncanonical
-      parentcommand = command.get 'name'
+      parentcommand = command.verb
       canonicalverb += " (alias for #{parentcommand})"
 
-    if (description == "I don't really do anything")
+    if not description? or description is "I don't really do anything"
       description = "A description has not yet been added."
 
-    if (helpstring == "Usage: lazy. Dats it")
+    if not helpstring? or helpstring is "Usage: lazy. Dats it"
       helpstring = "Usage: A usage format has not yet been added."
 
     mob.print "\r\nHelp for #{canonicalverb}:\r\n\r\n
