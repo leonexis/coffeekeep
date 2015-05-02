@@ -60,7 +60,8 @@ exports.UserCollection = class UserCollection extends MobCollection
   model: User
   urlPart: 'users'
 
-  create: (attributes, options) ->
+  create: (attributes, options={}, cb) ->
+    cb ?= -> null
     # Check to see if this is the first user created. If so, make it the
     # sysop
     if @length is 0
@@ -73,4 +74,4 @@ exports.UserCollection = class UserCollection extends MobCollection
         attributes.sysop = true
       # TODO: notify the user somehow?
 
-    super attributes, options
+    super attributes, options, cb

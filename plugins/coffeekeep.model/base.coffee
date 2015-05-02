@@ -327,3 +327,12 @@ exports.Collection = class Collection extends backbone.Collection
             do _success
 
     super _.extend callopts, opts
+
+  create: (attributes, options={}, cb) ->
+    cb ?= -> null
+    model = attributes
+    if model not instanceof @model
+      model = new @model attributes
+
+    @add model
+    model.save options, cb
