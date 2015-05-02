@@ -1,3 +1,5 @@
+_ = require 'underscore'
+
 new Command
   name: 'help'
   aliases: []
@@ -41,5 +43,15 @@ new Command
     if not helpstring? or helpstring is "Usage: lazy. Dats it"
       helpstring = "Usage: A usage format has not yet been added."
 
-    mob.print "\r\nHelp for #{canonicalverb}:\r\n\r\n
-      Description: #{description}\r\n\r\n#{helpstring}\r\n"
+    mob.print "Help for #{canonicalverb}:"
+    mob.print ''
+    mob.print "  Description: #{description}"
+    mob.print ''
+    mob.print helpstring
+
+    if mob.hasPermission '-all +sysop'
+      mob.print ''
+      mob.print "Extended Information:"
+      for key in _.keys command
+        continue if key in ['provider', 'help', 'description']
+        mob.print "  #{key}: #{JSON.stringify command[key]}"
