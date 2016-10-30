@@ -34,15 +34,15 @@ tests = (callback) ->
   mocha.on 'exit', (code) ->
     callback?() if code is 0
 
-task 'build', 'Build build/lib/ from lib/', ->
+task 'build', 'Build build/plugins/ from plugins/', ->
   build 'plugins/', 'build/plugins/', ->
     build 'test/', 'build/test/'
 
 task 'docs', 'Build documentation in docs/', ->
   docs()
 
-task 'watch', 'Watch src/ for changes', ->
-  coffee = spawn 'coffee', ['-w', '-c', '-m', '-o', 'build/lib', 'lib']
+task 'watch', 'Watch for changes', ->
+  coffee = spawn 'coffee', ['-w', '-c', '-m', '-o', 'build/plugins', 'plugins']
   coffee.stderr.on 'data', (data) ->
     process.stderr.write data.toString()
   coffee.stdout.on 'data', (data) ->

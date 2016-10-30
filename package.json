@@ -7,7 +7,7 @@
   "bin": "./bin/coffeekeep",
   "license": "MIT",
   "dependencies": {
-    "coffee-script": "~1.9.2",
+    "coffee-script": "~1.11.1",
     "express": "~3.20.2",
     "nodeunit": "~0.9.1",
     "optimist": "~0.6.1",
