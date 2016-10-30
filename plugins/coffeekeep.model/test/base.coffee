@@ -34,10 +34,12 @@ describe 'coffeekeep.model:base', ->
       foo.get('bar').should.eql 'baz'
       (should foo.get 'notreal').eql undefined
       (should foo.get 'notreal', 'foo').eql 'foo'
+      null
 
     it 'should allow specifying attributes on creation', ->
       foo = new model.models.base foo: 'bar'
       foo.get('foo').should.eql 'bar'
+      null
 
     it 'should allow saving a new entry to a data store', (done) ->
       foo = new model.models.base
