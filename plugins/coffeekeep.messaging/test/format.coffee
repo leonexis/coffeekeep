@@ -1,8 +1,34 @@
 should = require 'should'
-format = require '../lib/format'
-{Mob} = require '../lib/model/mob'
 
-describe 'format', ->
+path = require 'path'
+async = require 'async'
+should = require 'should'
+coffeekeep = require 'coffeekeep'
+
+config = [
+  './coffeekeep.log'
+  './coffeekeep.model'
+  './coffeekeep.storage.memory'
+  './coffeekeep.interpreter'
+  './coffeekeep.core'
+  './coffeekeep.messaging'
+]
+
+describe 'coffeekeep.model:base', ->
+  app = null
+  log = null
+  Message = null
+  before (done) ->
+    coffeekeep.createApp config, (err, _app) ->
+      return done err if err?
+      app = _app
+      {Message} = app.getService 'messaging'
+      done null
+
+  after ->
+    app.destroy()
+
+
   class FakeMob
     constructor: (opts={}) ->
       for k, v of opts
@@ -29,7 +55,7 @@ describe 'format', ->
         gender: 3
         name: 'faz'
 
-      msg = new format.Message
+      msg = new Message
         message: ''
         observer: mob3
         subject: mob1
@@ -137,7 +163,7 @@ describe 'format', ->
 
     describe '#forObserver', ->
       it 'should support specified observer', ->
-        msg.message = "{Name} hit{s} {^name}, killing {^him} while {he}
+        msg.setMessage "{Name} hit{s} {^name}, killing {^him} while {he}
           defend{s} {himself}."
         msg.forObserver(msg.observer).should.eql(
           'Foo hits bar, killing him while it defends itself.')
@@ -148,5 +174,5 @@ describe 'format', ->
 
     describe '#toString', ->
       it 'should use the default observer', ->
-        msg.message = "{Name} hit{s} {^name}"
+        msg.setMessage "{Name} hit{s} {^name}"
         msg.toString().should.eql 'Foo hits bar'

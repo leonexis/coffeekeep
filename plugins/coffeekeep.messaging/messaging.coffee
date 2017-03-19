@@ -149,8 +149,12 @@ module.exports = (options, imports, register) ->
 
       tokens
 
+    setMessage: (msg) ->
+      # Update all messages to the one specified
+      @message = @toOther = @toSubject = @toTarget = msg
+
     updateTokenCache: ->
-      for msg in ['toSubject', 'toObserver', 'toOther']
+      for msg in ['toSubject', 'toTarget', 'toOther']
         if @_tokensCache[msg] isnt @[msg]
           @tokens[msg] = @parse @[msg]
 
