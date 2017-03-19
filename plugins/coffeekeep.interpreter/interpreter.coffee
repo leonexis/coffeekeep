@@ -1,6 +1,6 @@
 {EventEmitter} = require 'events'
 async = require 'async'
-_ = require 'underscore'
+_ = require 'lodash'
 util = require 'util'
 {Command, CommandCollection} = require './command.coffee'
 

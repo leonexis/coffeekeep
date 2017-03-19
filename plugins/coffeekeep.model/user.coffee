@@ -1,4 +1,4 @@
-_ = require 'underscore'
+_ = require 'lodash'
 {Mob, MobCollection} = require './mob'
 
 exports.User = class User extends Mob

@@ -1,7 +1,7 @@
 backbone = require 'backbone'
 util = require 'util'
 async = require 'async'
-_ = require 'underscore'
+_ = require 'lodash'
 debug = require 'debug'
 
 UNSPECIFIED = new Object
@@ -172,9 +172,9 @@ exports.Model = class Model extends backbone.Model
     # Prefer new style of .save [options], cb
     opts = {}
     cb = -> null
-    if args.length is 2 and _(args[1]).isFunction()
+    if args.length is 2 and _.isFunction args[1]
       [opts, cb] = args
-    else if args.length is 1 and _(args[0]).isFunction()
+    else if args.length is 1 and _isFunction args[0]
       [cb] = args
     else if args.length isnt 0
       err = new Error "Deprecated use of save"
@@ -200,9 +200,9 @@ exports.Model = class Model extends backbone.Model
     # Prefer new style of .fetch [options], cb
     opts = {}
     cb = -> null
-    if args.length is 2 and _(args[1]).isFunction()
+    if args.length is 2 and _.isFunction args[1]
       [opts, cb] = args
-    else if args.length is 1 and _(args[0]).isFunction()
+    else if args.length is 1 and _.isFunction args[0]
       [cb] = args
     else if args.length isnt 0
       err = new Error "Deprecated use of fetch"
@@ -228,9 +228,9 @@ exports.Model = class Model extends backbone.Model
     # Prefer new style of .destroy [options], cb
     opts = {}
     cb = -> null
-    if args.length is 2 and _(args[1]).isFunction()
+    if args.length is 2 and _.isFunction args[1]
       [opts, cb] = args
-    else if args.length is 1 and _(args[0]).isFunction()
+    else if args.length is 1 and _.isFunction args[0]
       [cb] = args
     else if args.length isnt 0
       err = new Error "Deprecated use of destroy"
@@ -299,9 +299,9 @@ exports.Collection = class Collection extends backbone.Collection
     # Prefer new style of .fetch [options], cb
     opts = {}
     cb = -> null
-    if args.length is 2 and _(args[1]).isFunction()
+    if args.length is 2 and _.isFunction args[1]
       [opts, cb] = args
-    else if args.length is 1 and _(args[0]).isFunction()
+    else if args.length is 1 and _.isFunction args[0]
       [cb] = args
     else if args.length isnt 0
       err = new Error "Deprecated use of fetch"

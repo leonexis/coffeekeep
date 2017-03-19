@@ -5,8 +5,7 @@
   "private": true,
 
   "dependencies" : {
-    "backbone": "~1.0.0",
-    "underscore": "~1.5.2"
+    "backbone": "~1.0.0"
   },
 
   "plugin": {

@@ -1,4 +1,4 @@
-_ = require 'underscore'
+_ = require 'lodash'
 util = require 'util'
 {Model, Collection} = require './base'
 {format} = require '../coffeekeep.core/format'
@@ -225,7 +225,7 @@ class MobAttributeResolver extends security.AttributeResolver
   equal: (k, v) ->
     switch k
       when 'gender'
-        return super k, v if not _(Mob.gender).has v
+        return super k, v if not _.has Mob.gender, v
         n = Mob.gender[v]
         # Return true if direct match
         return true if n is @get k

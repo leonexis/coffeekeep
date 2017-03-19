@@ -1,5 +1,5 @@
 log = require 'npmlog'
-_ = require 'underscore'
+_ = require 'lodash'
 
 class Logger
   constructor: (@prefix) ->

@@ -6,7 +6,7 @@ Events: `area`, `room`
 
 ###
 events = require 'events'
-_ = require 'underscore'
+_ = require 'lodash'
 fs = require 'fs'
 path = require 'path'
 async = require 'async'

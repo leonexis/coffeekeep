@@ -1,6 +1,6 @@
 readline = require './readline'
 async = require 'async'
-_ = require 'underscore'
+_ = require 'lodash'
 {EventEmitter} = require 'events'
 {splitFull} = require './util'
 {format} = require './format'
@@ -220,7 +220,7 @@ exports.MudService = class MudService extends EventEmitter
   createSession: (socket) ->
     session = new MudSession @, socket
     session.once 'close', =>
-      @sessions = _(@sessions).without session
+      @sessions = _.without @sessions, session
 
     @sessions.push session
 

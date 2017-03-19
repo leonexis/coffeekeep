@@ -1,4 +1,4 @@
-_ = require 'underscore'
+_ = require 'lodash'
 
 ###
 Provide security related functions for permissions checking, etc

@@ -3,7 +3,7 @@ Augment a Backbone Model to use an in-memory key-value store
 (mainly for testing)
 ###
 util = require 'util'
-_ = require 'underscore'
+_ = require 'lodash'
 debug = require('debug') 'coffeekeep.storage.memory'
 
 class StorageError extends Error

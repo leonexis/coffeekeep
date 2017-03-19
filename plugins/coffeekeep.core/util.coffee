@@ -1,4 +1,4 @@
-_ = require 'underscore'
+_ = require 'lodash'
 
 exports.splitFull = (text, sep, maxsplit=-1) ->
   if not sep?

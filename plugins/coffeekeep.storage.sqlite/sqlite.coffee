@@ -4,7 +4,7 @@ Augment a Backbone Model to use sqlite as the backend storage
 path = require 'path'
 sqlite3 = require 'sqlite3'
 util = require 'util'
-_ = require 'underscore'
+_ = require 'lodash'
 
 class StorageError extends Error
   # For instanceof to work, the following is required whenever subclassing

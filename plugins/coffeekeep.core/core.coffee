@@ -1,4 +1,4 @@
-_ = require 'underscore'
+_ = require 'lodash'
 events = require 'events'
 async = require 'async'
 engine = require './engine'

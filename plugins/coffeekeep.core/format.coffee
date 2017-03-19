@@ -1,5 +1,3 @@
-_ = require 'underscore'
-
 exports.CSI = CSI = '\x1b'
 
 exports.ANSI_COLOR = ANSI_COLOR =
