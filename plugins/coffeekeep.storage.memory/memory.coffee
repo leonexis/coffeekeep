@@ -129,4 +129,4 @@ module.exports = (options, imports, register) ->
       sync: getSync imports.log, db, history
       _db: db
       _history: history
-      _reset: -> _.chain(db).keys().map((key) -> delete db[key])
+      _reset: -> delete db[key] for key of db

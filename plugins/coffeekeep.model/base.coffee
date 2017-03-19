@@ -174,7 +174,7 @@ exports.Model = class Model extends backbone.Model
     cb = -> null
     if args.length is 2 and _.isFunction args[1]
       [opts, cb] = args
-    else if args.length is 1 and _isFunction args[0]
+    else if args.length is 1 and _.isFunction args[0]
       [cb] = args
     else if args.length isnt 0
       err = new Error "Deprecated use of save"
