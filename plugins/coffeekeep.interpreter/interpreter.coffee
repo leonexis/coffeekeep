@@ -6,6 +6,7 @@ util = require 'util'
 
 class InterpreterPlugin extends EventEmitter
   constructor: (@options, @imports) ->
+    super()
     @log = new @imports.log.Logger => @constructor.name
     @debug = @options.debug ? false
     @imports.model.register "command", Command, CommandCollection

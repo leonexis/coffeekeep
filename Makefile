@@ -6,7 +6,7 @@ export MAKEHELP
 
 NODE_BIN = ./node_modules/.bin
 MOCHA = $(NODE_BIN)/mocha
-MOCHA_OPTS = --compilers coffee:coffee-script/register \
+MOCHA_OPTS = --compilers coffee:coffeescript/register \
 	--reporter spec \
 	--recursive \
 	--colors \

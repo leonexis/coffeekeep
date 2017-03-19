@@ -8,6 +8,7 @@ exports.MudClientSession = class MudClientSession extends EventEmitter
   isTTY: true
 
   constructor: (@service, @term) ->
+    super()
     # TODO: create mud session
     @paused = false
 

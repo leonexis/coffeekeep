@@ -14,6 +14,7 @@ exports.Model = class Model extends backbone.Model
 
   storedCollections: []
   constructor: (args...) ->
+    super args...
     @log = new @Logger => @toString()
     @lastSync = null
     @virtual = null
@@ -39,8 +40,6 @@ exports.Model = class Model extends backbone.Model
     #  return if id.indexOf('change') is 0
     #  console.log "#{do @toString} got event #{id} with options
     #    {util.inspect options}"
-
-    super args...
 
   toString: -> "[#{@constructor.name} #{@id}]"
   isNew: -> not @lastSync?
@@ -253,6 +252,7 @@ exports.Collection = class Collection extends backbone.Collection
     @log.silly args...
 
   constructor: (@parent, args...) ->
+    super args...
     @log = new @Logger => @toString()
 
     @on 'add', (model, collection, options) =>
@@ -275,8 +275,6 @@ exports.Collection = class Collection extends backbone.Collection
       return unless model is @parent
       @debug "@parent.on 'destroy' (%j, %j, %j)", model, collection, options
       # TODO: remove all our children
-
-    super args...
 
   toString: -> "[#{@constructor.name} in #{@parent?.toString()}]"
   url: ->

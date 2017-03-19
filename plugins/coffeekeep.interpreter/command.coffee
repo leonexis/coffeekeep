@@ -1,7 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 util = require 'util'
-coffee = require 'coffee-script'
+coffee = require 'coffeescript'
 _ = require 'underscore'
 {splitFull} = require '../coffeekeep.core/util'
 {Model, Collection} = require '../coffeekeep.model/base'

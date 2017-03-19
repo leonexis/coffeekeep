@@ -162,6 +162,7 @@ class MaskFactory
 
 class Mask extends MaskFactory
   constructor: (@acl) ->
+    super()
     @terms = @parse @acl
 
   resolve: (resolver) ->
@@ -220,6 +221,7 @@ class AttributeResolver
 
 class InsufficientPermissionsError extends Error
   constructor: ({@mob, @mask, @permission}) ->
+    super()
 
   toString: -> "#{@mob} fails permission '#{@permission}' with mask #{@mask}"
 

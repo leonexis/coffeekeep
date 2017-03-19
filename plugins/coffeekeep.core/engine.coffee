@@ -12,6 +12,7 @@ exports.MudSession = class MudSession extends EventEmitter
   # TODO: allow "frontend" between mud session and terminal, for example
   # using blessed for curses support
   constructor: (@service, @socket) ->
+    super()
     @world = @service.world
     @log = new @service.imports.log.Logger => @toString()
     @user = null #@world.users.first()
@@ -208,6 +209,7 @@ exports.MudSession = class MudSession extends EventEmitter
 exports.MudService = class MudService extends EventEmitter
 
   constructor: (@options, @imports) ->
+    super()
     @log = new @imports.log.Logger "MudService"
     @sessions = []
     @running = false

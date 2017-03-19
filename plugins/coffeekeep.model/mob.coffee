@@ -220,7 +220,7 @@ class MobCollection extends Collection
   urlPart: 'mobs'
 
 class MobAttributeResolver extends security.AttributeResolver
-  constructor: (@mob) ->
+  constructor: (@mob) -> super()
   get: (k) -> @mob.get k
   equal: (k, v) ->
     switch k

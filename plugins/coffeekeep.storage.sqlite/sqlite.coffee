@@ -8,13 +8,14 @@ _ = require 'underscore'
 
 class StorageError extends Error
   # For instanceof to work, the following is required whenever subclassing
-  constructor: -> super
+  # TODO: Check if this is still the case with CS2/ES6
+  constructor: -> super()
 
 class NotFoundError extends StorageError
-  constructor: -> super
+  constructor: -> super()
 
 class ExistsError extends StorageError
-  constructor: -> super
+  constructor: -> super()
 
 getSync = (_log, db) -> (method, model, options) ->
   options ?= {}

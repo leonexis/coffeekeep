@@ -17,7 +17,7 @@ class JSONReader extends events.EventEmitter
     return 8 if data[0] is '{'
     0
 
-  constructor: (@data) ->
+  constructor: (@data) -> super()
 
   read: ->
     @log?.debug "AreaReader: #{@data}"

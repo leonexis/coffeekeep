@@ -30,9 +30,9 @@ exports.ECHO_CENSOR = ECHO_CENSOR = 2
 exports.Interface = class Interface extends readline.Interface
   # Extend Node.JS Readline interface
   constructor: (options) ->
+    super options
     @echoMode = ECHO_NORMAL
     @needsRefresh = false
-    super options
 
   setEcho: (setting) ->
     ###
@@ -54,7 +54,7 @@ exports.Interface = class Interface extends readline.Interface
 
   _refreshLine: ->
     @needsRefresh = false
-    return super if @echoMode is ECHO_NORMAL
+    return super() if @echoMode is ECHO_NORMAL
     line = @line
     cursor = @cursor
     switch @echoMode
@@ -63,7 +63,7 @@ exports.Interface = class Interface extends readline.Interface
         @cursor = 0
       when ECHO_CENSOR
         @line = @line.replace /[\s\S]/g, '*'
-    super
+    super()
     @line = line
     @cursor = cursor
 
@@ -84,10 +84,10 @@ exports.Interface = class Interface extends readline.Interface
       # dont bother refreshing if we aren't going to change anything
       do @_refreshLine
 
-  _tabComplete: -> super if @echoMode is ECHO_NORMAL
+  _tabComplete: -> super() if @echoMode is ECHO_NORMAL
 
   _addHistory: ->
-    return super if @echoMode is ECHO_NORMAL
+    return super() if @echoMode is ECHO_NORMAL
     @line
 
   setPrompt: (prompt) ->

@@ -12,7 +12,7 @@ class ROMReader extends events.EventEmitter
     return 5 if data[...5] is "#AREA"
     return 0
 
-  constructor: (@data) ->
+  constructor: (@data) -> super()
 
   getString: ->
     # Get string up to ~
