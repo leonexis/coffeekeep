@@ -1,6 +1,8 @@
 terminal = require 'term.js'
 io = require 'socket.io'
 express = require 'express'
+logger = require 'morgan'
+directory = require 'serve-index'
 http = require 'http'
 exports.app = app = express()
 exports.httpServer = server = http.createServer(app)
@@ -8,10 +10,10 @@ exports.httpServer = server = http.createServer(app)
 exports.setup = (options, imports, cb) ->
   {log, world} = imports
   _log = new log.Logger "coffeekeep.core:app"
-  app.set 'view engine', 'jade'
+  app.set 'view engine', 'pug'
   app.set 'views', __dirname + '/views'
 
-  app.use express.logger()
+  app.use logger()
 
   app.use terminal.middleware()
 
@@ -35,7 +37,7 @@ exports.setup = (options, imports, cb) ->
   app.get '/client', (req, res) ->
     res.render 'mudClient'
 
-  app.use express.directory "#{__dirname}/../public"
+  app.use directory "#{__dirname}/../public"
   app.use express.static "#{__dirname}/../public"
 
   app.set 'server', server
