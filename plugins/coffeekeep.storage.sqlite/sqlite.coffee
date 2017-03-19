@@ -8,14 +8,19 @@ _ = require 'lodash'
 
 class StorageError extends Error
   # For instanceof to work, the following is required whenever subclassing
-  # TODO: Check if this is still the case with CS2/ES6
-  constructor: -> super()
+  constructor: ->
+    super arguments...
+    @name = "StorageError"
 
 class NotFoundError extends StorageError
-  constructor: -> super()
+  constructor: ->
+    super arguments...
+    @name = "NotFoundError"
 
 class ExistsError extends StorageError
-  constructor: -> super()
+  constructor: ->
+    super arguments...
+    @name = "ExistsError"
 
 getSync = (_log, db) -> (method, model, options) ->
   options ?= {}

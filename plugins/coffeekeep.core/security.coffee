@@ -222,6 +222,7 @@ class AttributeResolver
 class InsufficientPermissionsError extends Error
   constructor: ({@mob, @mask, @permission}) ->
     super()
+    @name = "InsufficientPermissionsError"
 
   toString: -> "#{@mob} fails permission '#{@permission}' with mask #{@mask}"
 
