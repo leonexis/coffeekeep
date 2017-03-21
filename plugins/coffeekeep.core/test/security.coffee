@@ -1,8 +1,31 @@
 should = require 'should'
-security = require '../lib/security'
-{Mob} = require '../lib/model/mob'
+security = require '../security'
 
-describe 'security', ->
+coffeekeep = require 'coffeekeep'
+
+config = [
+  './coffeekeep.log'
+  './coffeekeep.model'
+  './coffeekeep.storage.memory'
+  './coffeekeep.interpreter'
+  './coffeekeep.core'
+]
+
+
+describe 'coffeekeep.core:security', ->
+  app = null
+  log = null
+  Mob = null
+  before (done) ->
+    coffeekeep.createApp config, (err, _app) ->
+      return done err if err?
+      app = _app
+      Mob = app.getService('model').models.mob
+      done null
+
+  after ->
+    app.destroy()
+
   describe 'AttributeResolver', ->
     br = new security.AttributeResolver
       foo: 1
@@ -66,8 +89,8 @@ describe 'security', ->
         tokens = mf.parse 'all'
         tokens.should.have.length 1
         tokens[0].should.have.property 'name', 'all'
-        tokens[0].should.not.have.property 'operator'
-        tokens[0].should.not.have.property 'value'
+        tokens[0].should.have.property 'operator', undefined
+        tokens[0].should.have.property 'value', undefined
 
       it 'should parse complex attributes', ->
         tokens = mf.parse 'level>5'
@@ -141,22 +164,22 @@ describe 'security', ->
 
       it 'should resolve "all"', ->
         perms = mf.resolve '+all:one', fr
-        perms.should.include ''
-        perms.should.include 'one'
+        perms.should.containEql ''
+        perms.should.containEql 'one'
 
       it 'should support additive tokens', ->
         perms = mf.resolve '+all +level>6:one +abilities.foo:two', fr
-        perms.should.include ''
-        perms.should.include 'two'
-        perms.should.not.include 'one'
+        perms.should.containEql ''
+        perms.should.containEql 'two'
+        perms.should.not.containEql 'one'
 
       it 'should support subtractive tokens', ->
         perms = mf.resolve(
           '+all:one,two,three -level<5:two -level<10:three', fr)
-        perms.should.include ''
-        perms.should.include 'one'
-        perms.should.include 'two'
-        perms.should.not.include 'three'
+        perms.should.containEql ''
+        perms.should.containEql 'one'
+        perms.should.containEql 'two'
+        perms.should.not.containEql 'three'
 
   describe 'Mask', ->
     ar = null
@@ -169,7 +192,7 @@ describe 'security', ->
 
     it 'should resolve', ->
       mask = new security.Mask '+all:one'
-      mask.resolve(ar).should.include 'one'
+      mask.resolve(ar).should.containEql 'one'
 
     it 'should check for permissions', ->
       mask = new security.Mask '+all:one'
